@@ -1,0 +1,173 @@
+{% extends "base_template.html" %}
+
+{% block title %}Prototipe{% endblock %}
+
+
+{% block content %}
+    <div class= "banner_box">
+        <img src="/static/images/Crowd4SDG.png" style="height: 45px;">
+    </div>         
+    <h1> VisualCit Pipeline Interface </h1>
+    <div class= "source">
+        <form method="POST">
+            <select id="source" name="source">
+                <option value="Twitter"{% if source_applied[0].source == "Twitter" %}selected{%endif%}>Twitter</option>
+                <option value="Flickr"{% if source_applied[0].source == "Flickr" %}selected{%endif%}>Flickr</option>
+                <option value="Reddit"{% if source_applied[0].source == "Reddit" %}selected{%endif%}>Reddit</option>
+            </select>
+            <input id="keywords" name="keywords" type="text" {% if count == 0 %} value="-Keywords-" {% else %} value= {{source_applied[0].keywords}} {% endif %}>
+            <label for="number_pic">Number of images:</label>
+            <input id="number_pic" name="number_pic" {% if count > 0%} value= {{number_images}} {% endif %} type="number" min="1" step="1" style="width: 50px;">
+            <button type="submit" class="source_button" name="source_button" value="">Search</button> <br><br>
+        </form>
+        {% if urls|length < number_images|int %}
+            {% set number= urls|length %}
+        {% else %}
+            {% set number= number_images|int %}
+        {% endif %}
+        {% for s in source_applied %}
+        {% if s.source != "" %}
+        {% if s.source == 'Twitter' %}
+            <div class="container">
+                {% for u in range(number) %}
+                    <img src= {{ urls[u].url}} height=100 style="display: inline-block;" loading="lazy"/>
+                {% endfor %}
+            </div><br>
+        {% elif s.source == 'Flickr' %}
+            <div class="container">
+                {% for u in range(20) %}
+                    <img src= {{ urls[u+20].url }} height=100 style="display: inline-block;"/>
+                {% endfor %}
+            </div><br>
+        {% else %}
+            <div class="container">
+                {% for u in range(20) %}
+                    <img src= {{ urls[u+40].url }} height=100 style="display: inline-block;"/>
+                {% endfor %}
+            </div><br>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+    <div class= "filters">
+        {% if count>0 %}
+        {% for x in range(count) %}
+        <form method="POST">
+            {% if count > x+1 and x > 0 %}
+            <button type="submit" class= "btn" name= "up_button" value= {{x+1}}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
+            {% endif %}
+            <select id={{"Filter"~(x+1)}} name="Filter_select" required="">
+                <option value="--">-Select-</option>
+                <option value="Remove memes" {% if applied[x].Filter == "Remove memes" %} selected {% endif %}>Remove memes</option>
+                <option value="Scene detector" {% if applied[x].Filter == "Scene detector" %} selected {% endif %}>Scene detector</option>
+                <option value="Contains object" {% if applied[x].Filter == "Contains object" %} selected {% endif %}>Contains object</option>
+                <option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>
+            </select>
+            {% for message in get_flashed_messages() %}
+            {% if applied[x].Filter == "" %}
+            <span style="color: red;">{{ message }}</span>
+            {% endif %}
+            {% endfor %}
+            <select id={{"option1"~(x+1)}} name="option1_select" {% if applied[x].Filter == "Scene detector" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                <option value="Indoors" {% if applied[x].Attribute == "Indoors" %} selected {% endif %}>Indoors</option>
+                <option value="Outdoors" {% if applied[x].Attribute == "Outdoors" %} selected {% endif %}>Outdoors</option>
+                <option value="Sea" {% if applied[x].Attribute == "Sea" %} selected {% endif %}>Sea</option>
+                <option value="Mountain" {% if applied[x].Attribute == "Mountain" %} selected {% endif %}>Mountain</option>
+                <option value="Day" {% if applied[x].Attribute == "Day" %} selected {% endif %}>Day</option>
+                <option value="Night" {% if applied[x].Attribute == "Night" %} selected {% endif %}>Night</option>
+            </select>
+            <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == "Contains object" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                <option value="Person" {% if applied[x].Attribute == "Person" %} selected {% endif %}>Person</option>
+                <option value="Rubble" {% if applied[x].Attribute == "Rubble" %} selected {% endif %}>Rubble</option>
+                <option value="House" {% if applied[x].Attribute == "House" %} selected {% endif %}>House</option>
+                <option value="Water" {% if applied[x].Attribute == "Water" %} selected {% endif %}>Water</option>
+                <option value="Animal" {% if applied[x].Attribute == "Animal" %} selected {% endif %}>Animal</option>
+                <option value="Flood" {% if applied[x].Attribute == "Flood" %} selected {% endif %}>Flood</option>
+                <option value="Fallen tree" {% if applied[x].Attribute == "Fallen tree" %} selected {% endif %}>Fallen tree</option>
+                <option value="Ash" {% if applied[x].Attribute == "Ash" %} selected {% endif %}>Ash</option>
+                <option value="Fire" {% if applied[x].Attribute == "Fire" %} selected {% endif %}>Fire</option>
+            </select>
+            <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
+            <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
+            <button type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
+            {% if count > x+1 %}
+            <button type="submit" class="download_button" name="download_button" value="" style="float: right;">Download file</button>
+            {% endif %}
+            <br><br>
+        </form>
+        {% if applied[x].Filter != "" %}
+        {% for s in source_applied %}
+        {% if s.source == 'Twitter' %}
+            <div class="container">
+                {% for u in range(number) %}
+                    <img src= {{ urls[u].url }} height=100 style="display: inline-block;" loading="lazy"/>
+                {% endfor %}
+            </div><br>
+        {% elif s.source == 'Flickr' %}
+            <div class="container">
+                {% for u in range(20) %}
+                    <img src= {{ urls[u+20].url }} height=100 style="display: inline-block;"/>
+                {% endfor %}
+            </div><br>
+        {% else %}
+            <div class="container">
+                {% for u in range(20) %}
+                    <img src= {{ urls[u+40].url }} height=100 style="display: inline-block;"/>
+                {% endfor %}
+            </div><br>
+        {% endif %}
+        {% endfor %} 
+        {% endif %}      
+        {% endfor %}
+        {% endif %}
+    </div>
+    <div class= "reset">
+        <form method="POST">
+            <button type="submit" class="reset_button" name="reset_button" value="">Reset</button>
+        </form>
+    </div>
+    <script>
+        for (i=0;i < {{count}};i++) {
+            var a = i+1
+            let Filter_select = document.getElementById('Filter'+a);
+            let option1_select = document.getElementById('option1'+a);
+            let option2_select = document.getElementById('option2'+a);
+            let latitude_text = document.getElementById('latitude'+a);
+            let longitude_text = document.getElementById('longitude'+a);
+        
+            Filter_select.onchange = function() {
+                Filter = Filter_select.value;
+                if(Filter == 'Scene detector') {
+                    option1_select.style.display='inline';
+                }
+                else {
+                    option1_select.style.display='none';
+                }
+                if(Filter == 'Contains object') {
+                    option2_select.style.display='inline';
+                }
+                else {
+                    option2_select.style.display='none';
+                }
+                if(Filter == 'Geographic') {
+                    latitude_text.style.display='inline';
+                    longitude_text.style.display='inline';
+                }
+                else {
+                    latitude_text.style.display='none';
+                    longitude_text.style.display='none';
+                }
+            }
+        }
+    </script>
+    <script>
+            $(window).scroll(function () {
+            sessionStorage.scrollTop = $(this).scrollTop();
+            });
+            $(document).ready(function () {
+                if (sessionStorage.scrollTop != "undefined") {
+                    $(window).scrollTop(sessionStorage.scrollTop);
+                }
+            });
+    </script> 
+{% endblock %}
