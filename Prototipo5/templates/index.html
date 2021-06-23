@@ -15,13 +15,13 @@
                 <option value="Flickr"{% if source_applied[0].source == "Flickr" %}selected{%endif%}>Flickr</option>
                 <option value="Reddit"{% if source_applied[0].source == "Reddit" %}selected{%endif%}>Reddit</option>
             </select>
-            <input id="keywords" name="keywords" type="text" {% if count == 0 %} value="-Keywords-" {% else %} value= {{source_applied[0].keywords}} {% endif %}>
-            <label for="number_pic">Number of images:</label>
-            <input id="number_pic" name="number_pic" {% if count > 0%} value= {{number_images}} {% endif %} type="number" min="1" step="1" style="width: 50px;">
+            <input id="keywords" name="keywords" type="text" {% if count == 0 %} value="Search keywords" {% else %} value= {{source_applied[0].keywords}} {% endif %}>
+            <label for="number_pic" style= "margin-left: 20px;">Number of images:</label>
+            <input id="number_pic" name="number_pic" {% if count == 0%} value= 100 {% else %} value= {{number_images}} {% endif %} type="number" min="1" step="1" style="width: 50px;">
             <button type="submit" class="source_button" name="source_button" value="">Search</button> <br><br>
         </form>
-        {% if urls|length < number_images|int %}
-            {% set number= urls|length %}
+        {% if urls[0]|length < number_images|int %}
+            {% set number= urls[0]|length %}
         {% else %}
             {% set number= number_images|int %}
         {% endif %}
@@ -30,19 +30,19 @@
         {% if s.source == 'Twitter' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ urls[u].url}} height=100 style="display: inline-block;" loading="lazy"/>
+                    <img src= {{ urls[0][u].url}} height=100 style="display: inline-block;" loading="lazy"/>
                 {% endfor %}
             </div><br>
         {% elif s.source == 'Flickr' %}
             <div class="container">
                 {% for u in range(20) %}
-                    <img src= {{ urls[u+20].url }} height=100 style="display: inline-block;"/>
+                    <img src= {{ urls[0][u+20].url }} height=100 style="display: inline-block;"/>
                 {% endfor %}
             </div><br>
         {% else %}
             <div class="container">
                 {% for u in range(20) %}
-                    <img src= {{ urls[u+40].url }} height=100 style="display: inline-block;"/>
+                    <img src= {{ urls[0][u+40].url }} height=100 style="display: inline-block;"/>
                 {% endfor %}
             </div><br>
         {% endif %}
@@ -91,7 +91,7 @@
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
             <button type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
             {% if count > x+1 %}
-            <button type="submit" class="download_button" name="download_button" value="" style="float: right;">Download file</button>
+            <button type="submit" class="download_button" name="download_button" value={{x+1}} style="float: right;">Download file</button>
             {% endif %}
             <br><br>
         </form>
@@ -100,19 +100,19 @@
         {% if s.source == 'Twitter' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ urls[u].url }} height=100 style="display: inline-block;" loading="lazy"/>
+                    <img src= {{ urls[x+1][u].url }} height=100 style="display: inline-block;" loading="lazy"/>
                 {% endfor %}
             </div><br>
         {% elif s.source == 'Flickr' %}
             <div class="container">
                 {% for u in range(20) %}
-                    <img src= {{ urls[u+20].url }} height=100 style="display: inline-block;"/>
+                    <img src= {{ urls[x+1][u+20].url }} height=100 style="display: inline-block;"/>
                 {% endfor %}
             </div><br>
         {% else %}
             <div class="container">
                 {% for u in range(20) %}
-                    <img src= {{ urls[u+40].url }} height=100 style="display: inline-block;"/>
+                    <img src= {{ urls[x+1][u+40].url }} height=100 style="display: inline-block;"/>
                 {% endfor %}
             </div><br>
         {% endif %}
