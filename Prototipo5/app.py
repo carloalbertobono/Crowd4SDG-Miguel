@@ -84,16 +84,16 @@ def index():
                         attribute = request.form['option2_select']
                     else:
                         attribute = [request.form['latitude_text'], request.form['longitude_text']]
-                    url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
-                    #url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
+                    #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
+                    url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
                     f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'url': url_csv}
                     k = {'ID': "", 'Filter': "", 'Attribute': "", 'url': ""}
                     applied[count-1] = f
                     applied.append(k)
                     
-                    url_csv_get = requests.get(url_csv)
-                    url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
-                    df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
+                    #url_csv_get = requests.get(url_csv)
+                    #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
+                    df = pd.read_csv(url_csv, error_bad_lines=False, index_col=False)
                     u = []
                     for x in range(len(df)):
                         p = {"url": df['media_url'].iloc[x]}
@@ -115,14 +115,14 @@ def index():
                         attribute = request.form['option2_select']
                     else:
                         attribute = [request.form['latitude_text'], request.form['longitude_text']]
-                    url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
-                    #url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
+                    #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
+                    url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
                     f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'url': url_csv}
                     applied[sel_count-1] = f
                     
-                    url_csv_get = requests.get(url_csv)
-                    url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
-                    df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
+                    #url_csv_get = requests.get(url_csv)
+                    #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
+                    df = pd.read_csv(url_csv, error_bad_lines=False, index_col=False)
                     u = []
                     for x in range(len(df)):
                         p = {"url": df['media_url'].iloc[x]}
@@ -144,11 +144,11 @@ def index():
             applied[int(request.form['up_button'])-1] = a
         else:
             url_download = int(request.form['download_button'])
-            #redirect(applied["url"][url_download-1])
-            #print(applied[url_download-1])
-            print(applied)
-            print(count)
-            pass
+            return redirect(applied[url_download-1]["url"])
+            #print(applied[url_download-1]["url"])
+            #print(applied)
+            #print(url_download)
+            #pass
     return render_template('index.html', count=count, source_applied=source_applied, urls=urls,
                            applied=applied, number_images=number_images)
 
