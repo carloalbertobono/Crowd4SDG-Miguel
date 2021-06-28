@@ -1,12 +1,10 @@
 # Crowd4SDG-Miguel
 In order to run this interface:
 
-- Go to the directory of "app.py". Ex:
-    cd Documents/GitHub/Crowd4SDG-Miguel/Prototipo5
-- Write on your prompt:
-    set "FLASK_APP=app.py"
-- Run the flask app by writing:
-    flask run
+- Type: 
+    export FLASK_APP=app.py
+- Run the flask app by typing:
+    flask run -- port 2000
 
 
 In order to use this interface:
