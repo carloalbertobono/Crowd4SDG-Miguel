@@ -61,7 +61,7 @@
                 <option value="Remove memes" {% if applied[x].Filter == "Remove memes" %} selected {% endif %}>Remove memes</option>
                 <option value="Scene detector" {% if applied[x].Filter == "Scene detector" %} selected {% endif %}>Scene detector</option>
                 <option value="Contains object" {% if applied[x].Filter == "Contains object" %} selected {% endif %}>Contains object</option>
-                <option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>
+                <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>-->
             </select>
             {% for message in get_flashed_messages() %}
             {% if applied[x].Filter == "" %}
@@ -69,15 +69,17 @@
             {% endif %}
             {% endfor %}
             <select id={{"option1"~(x+1)}} name="option1_select" {% if applied[x].Filter == "Scene detector" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <option value="Indoors" {% if applied[x].Attribute == "Indoors" %} selected {% endif %}>Indoors</option>
+                <option value="PublicPrivateClassifier 0.93" {% if applied[x].Attribute == "Indoors" %} selected {% endif %}>Indoors</option>
+                <!--
                 <option value="Outdoors" {% if applied[x].Attribute == "Outdoors" %} selected {% endif %}>Outdoors</option>
                 <option value="Sea" {% if applied[x].Attribute == "Sea" %} selected {% endif %}>Sea</option>
                 <option value="Mountain" {% if applied[x].Attribute == "Mountain" %} selected {% endif %}>Mountain</option>
                 <option value="Day" {% if applied[x].Attribute == "Day" %} selected {% endif %}>Day</option>
-                <option value="Night" {% if applied[x].Attribute == "Night" %} selected {% endif %}>Night</option>
+                <option value="Night" {% if applied[x].Attribute == "Night" %} selected {% endif %}>Night</option> -->
             </select>
             <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == "Contains object" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <option value="Person" {% if applied[x].Attribute == "Person" %} selected {% endif %}>Person</option>
+                <option value="PeopleDetector 0.98" {% if applied[x].Attribute == "Person" %} selected {% endif %}>Person</option>
+                <!--
                 <option value="Rubble" {% if applied[x].Attribute == "Rubble" %} selected {% endif %}>Rubble</option>
                 <option value="House" {% if applied[x].Attribute == "House" %} selected {% endif %}>House</option>
                 <option value="Water" {% if applied[x].Attribute == "Water" %} selected {% endif %}>Water</option>
@@ -85,7 +87,7 @@
                 <option value="Flood" {% if applied[x].Attribute == "Flood" %} selected {% endif %}>Flood</option>
                 <option value="Fallen tree" {% if applied[x].Attribute == "Fallen tree" %} selected {% endif %}>Fallen tree</option>
                 <option value="Ash" {% if applied[x].Attribute == "Ash" %} selected {% endif %}>Ash</option>
-                <option value="Fire" {% if applied[x].Attribute == "Fire" %} selected {% endif %}>Fire</option>
+                <option value="Fire" {% if applied[x].Attribute == "Fire" %} selected {% endif %}>Fire</option>-->
             </select>
             <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
@@ -97,6 +99,9 @@
         </form>
         {% if applied[x].Filter != "" %}
         {% for s in source_applied %}
+        {% if urls[x+1]|length < number %}
+            {% set number= urls[x+1]|length %}
+        {% endif %}
         {% if s.source == 'Twitter' %}
             <div class="container">
                 {% for u in range(number) %}
