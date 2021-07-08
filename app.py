@@ -26,12 +26,13 @@ applied = []
 source_applied = []
 count = 0
 number_images= 100
+confidence= 0.9
 s0 = {'ID': "", 'source': "", 'keywords': ""}
 source_applied.append(s0)
 
 @app.route('/', methods=['GET','POST'])
 def index():
-    global count, applied, source_applied, number_images, urls, paths
+    global count, applied, source_applied, number_images, urls, paths, confidence
     if request.method == "POST":
         if 'source_button' in request.form:
             if count == 0:
@@ -93,6 +94,7 @@ def index():
                         attribute = request.form['option2_select']
                     else:
                         attribute = [request.form['latitude_text'], request.form['longitude_text']]
+                    confidence = request.form['confidence']
                     #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
                     params = {'filter_name_list': [attribute.split()[0]],
                               #'confidence_threshold_list': [float(attribute.split()[1])],
@@ -131,6 +133,7 @@ def index():
                         attribute = request.form['option2_select']
                     else:
                         attribute = [request.form['latitude_text'], request.form['longitude_text']]
+                    confidence = request.form['confidence']
                     #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
                     #url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
 
@@ -168,9 +171,9 @@ def index():
             urls = []
             paths = []
         elif 'up_button' in request.form:
-            print(applied)
-            print(urls)
-            print(paths)
+            print(len(applied))
+            print(len(urls))
+            print(len(paths))
             #sel_count = int(request.form['up_button'])
             #a = applied[sel_count-2]
             #applied[sel_count-2] = applied[sel_count-1]
@@ -201,7 +204,7 @@ def index():
             #print(url_download)
             pass
     return render_template('index.html', count=count, source_applied=source_applied, urls=urls,
-                           applied=applied, number_images=number_images)
+                           applied=applied, number_images=number_images, confidence=confidence)
 
 if __name__ == '__main__':
     app.run(debug=True)

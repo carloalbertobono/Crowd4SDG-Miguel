@@ -6,8 +6,11 @@
 {% block content %}
     <div class= "banner_box">
         <img src="/static/images/Crowd4SDG.png" style="height: 45px;">
-    </div>         
-    <h1> VisualCit Pipeline Interface </h1>
+    </div>
+    <h1 class= "logo">
+        <img src="/static/images/VisualCit.png" style="height: 60px;">   
+        Pipeline Interface 
+    </h1>
     <div class= "source">
         <form method="POST">
             <select id="source" name="source">
@@ -91,8 +94,8 @@
             </select>
             <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
-            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} style= "margin-left: 20px; display: none;">Confidence treshold:</label>
-            <input id={{"confidence"~(x+1)}} name="confidence" value= "0.9" type="number" min="0" max="1" step="0.01" style="width: 50px; display: none;">
+            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--'%} style= "margin-left: 20px; display: inline;" {% else %} style= "margin-left: 20px; display: none;" {% endif %}>Confidence treshold:</label>
+            <input id={{"confidence"~(x+1)}} name="confidence" value= {{confidence}} type="number" min="0" max="1" step="0.01" {% if applied[x].Filter != '' and applied[x].Filter != '--'%} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <button type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
             {% if count > x+1 %}
             <button type="submit" class="download_button" name="download_button" value={{x+1}} style="float: right;">Download file</button>
