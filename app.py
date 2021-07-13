@@ -40,24 +40,31 @@ def index():
                 keywords = request.form['keywords']
                 number_images = request.form['number_pic']
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETUZnzuvqtlHv0iHyyOI0MYBO7O1yFXIqu0QPeIhHUJZnw?Download=1"
-                url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"
-                s = {'ID': count, 'source': option, 'keywords': keywords, 'url': url_csv}
+                #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"
+                r = requests.post('http://131.175.120.2:7777/Crawler/API/CrawlCSV',
+                                  json={'query': keywords,
+                                        'count': number_images})                
+                s = {'ID': count, 'source': option, 'keywords': keywords}
                 source_applied[0]= s
                 f = {'ID': "", 'Filter': "", 'Attribute': "", 'url': ""}
                 applied.append(f)
                 
-                url_csv_get = requests.get(url_csv)
-                url_request = StringIO(url_csv_get.content.decode('utf-8'))
-                df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
-                file = pd.DataFrame.to_csv(df, path_or_buf=(None))
-                print(df)
+                #url_csv_get = requests.get(url_csv)
+                #url_request = StringIO(url_csv_get.content.decode('utf-8'))
+                #df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
+                #file = pd.DataFrame.to_csv(df, path_or_buf=(None))
+                #print(df)
+                
+                tmp= StringIO(r.text)
+                df= pd.read_csv(tmp)                
+                
                 u = []
                 for x in range(len(df)):
                     p = {"url": df['media_url'].iloc[x]}
                     u.append(p)
                 urls.append(u)
                 #paths.append(url_csv_get.text)
-                paths.append(file)
+                paths.append(r.text)
     
                 count+=1
                 
@@ -66,21 +73,28 @@ def index():
                 keywords = request.form['keywords']
                 number_images = request.form['number_pic']
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETUZnzuvqtlHv0iHyyOI0MYBO7O1yFXIqu0QPeIhHUJZnw?Download=1"
-                url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"                
+                #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"                
+                r = requests.post('http://131.175.120.2:7777/Crawler/API/CrawlCSV',
+                                  json={'query': keywords,
+                                        'count': number_images})                
                 s = {'ID': count, 'source': option, 'keywords': keywords}
                 source_applied[0]= s
                 
-                url_csv_get = requests.get(url_csv)
-                url_request = StringIO(url_csv_get.content.decode('utf-8'))
-                df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
-                file = pd.DataFrame.to_csv(df, path_or_buf=(None))
+                #url_csv_get = requests.get(url_csv)
+                #url_request = StringIO(url_csv_get.content.decode('utf-8'))
+                #df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
+                #file = pd.DataFrame.to_csv(df, path_or_buf=(None))
+                
+                tmp= StringIO(r.text)
+                df= pd.read_csv(tmp)                
+                
                 u = []
                 for x in range(len(df)):
                     p = {"url": df['media_url'].iloc[x]}
                     u.append(p)
                 urls[0]= u                
                 #paths[0]= url_csv_get.text
-                paths[0]= file
+                paths[0]= r.text
                 
         elif 'apply_button' in request.form:
             if int(request.form['apply_button']) == count:
