@@ -46,7 +46,8 @@ def index():
                                         'count': number_images})                
                 s = {'ID': count, 'source': option, 'keywords': keywords}
                 source_applied[0]= s
-                f = {'ID': "", 'Filter': "", 'Attribute': "", 'url': ""}
+                print(source_applied)
+                f = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
                 applied.append(f)
                 
                 #url_csv_get = requests.get(url_csv)
@@ -79,6 +80,7 @@ def index():
                                         'count': number_images})                
                 s = {'ID': count, 'source': option, 'keywords': keywords}
                 source_applied[0]= s
+                print(source_applied)
                 
                 #url_csv_get = requests.get(url_csv)
                 #url_request = StringIO(url_csv_get.content.decode('utf-8'))
@@ -101,7 +103,7 @@ def index():
                 if request.form['Filter_select'] != "--":
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == "Remove memes":
-                        attribute = "MemeDetector 0.89"
+                        attribute = "MemeDetector"
                     elif request.form['Filter_select'] == "Scene detector":
                         attribute = request.form['option1_select']
                     elif request.form['Filter_select'] == "Contains object":
@@ -110,7 +112,7 @@ def index():
                         attribute = [request.form['latitude_text'], request.form['longitude_text']]
                     confidence = request.form['confidence']
                     #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
-                    params = {'filter_name_list': [attribute.split()[0]],
+                    params = {'filter_name_list': [attribute],
                               #'confidence_threshold_list': [float(attribute.split()[1])],
                               'confidence_threshold_list': [request.form['confidence']],
                               'column_name': 'media_url',
@@ -119,10 +121,11 @@ def index():
                         
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/filterImage', json=params)
                     
-                    f = {'ID': count, 'Filter': Filter, 'Attribute': attribute}
-                    k = {'ID': "", 'Filter': "", 'Attribute': ""}
+                    f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
+                    k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
                     applied[count-1] = f
                     applied.append(k)
+                    print(applied)
                     paths.append(r.text)
                     tmp= StringIO(r.text)
                     df= pd.read_csv(tmp)
@@ -140,7 +143,7 @@ def index():
                 if request.form['Filter_select'] != "--":
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == "Remove memes":
-                        attribute = "MemeDetector 0.89"
+                        attribute = "MemeDetector"
                     elif request.form['Filter_select'] == "Scene detector":
                         attribute = request.form['option1_select']
                     elif request.form['Filter_select'] == "Contains object":
@@ -151,7 +154,7 @@ def index():
                     #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
                     #url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
 
-                    params = {'filter_name_list': [attribute.split()[0]],
+                    params = {'filter_name_list': [attribute],
                               #'confidence_threshold_list': [float(attribute.split()[1])],
                               'confidence_threshold_list': [request.form['confidence']],
                               'column_name': 'media_url',
@@ -160,8 +163,9 @@ def index():
                     
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/filterImage', json=params)
                     
-                    f = {'ID': count, 'Filter': Filter, 'Attribute': attribute}
+                    f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                     applied[sel_count-1] = f
+                    print(applied)
                     paths[sel_count] = r.text                    
                     #url_csv_get = requests.get(url_csv)
                     #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
