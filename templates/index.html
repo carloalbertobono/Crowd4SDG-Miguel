@@ -19,7 +19,7 @@
                 <option value="Flickr"{% if source_applied[0].source == "Flickr" %}selected{%endif%}>Flickr</option>
                 <option value="Reddit"{% if source_applied[0].source == "Reddit" %}selected{%endif%}>Reddit</option> -->
             </select>
-            <input id="keywords" name="keywords" type="text" {% if count == 0 %} value="Search keywords" {% else %} value= {{source_applied[0].keywords}} {% endif %}>
+            <input id="keywords" name="keywords" type="text" {% if count > 0 %} value= '{{source_applied[0].keywords}}' {% endif %} placeholder= "Search keywords" required>
             <label for="number_pic" style= "margin-left: 20px;">Number of images:</label>
             <input id="number_pic" name="number_pic" {% if count == 0%} value= 100 {% else %} value= {{number_images}} {% endif %} type="number" min="100" step="100" style="width: 50px;">
             <button id="source_button" type="submit" class="source_button" name="source_button" value="">Search</button> 
@@ -56,8 +56,8 @@
             {% if count > x+1 and x > 0 %}
             <button type="submit" class= "btn" name= "up_button" value= {{x+1}}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
             {% endif %}
-            <select id={{"Filter"~(x+1)}} name="Filter_select" required="">
-                <option value="--">-Select-</option>
+            <select id={{"Filter"~(x+1)}} name="Filter_select" required>
+                <option value="">-Select-</option>
                 <option value="Remove memes" {% if applied[x].Filter == "Remove memes" %} selected {% endif %}>Remove memes</option>
                 <option value="Scene detector" {% if applied[x].Filter == "Scene detector" %} selected {% endif %}>Scene detector</option>
                 <option value="Contains object" {% if applied[x].Filter == "Contains object" %} selected {% endif %}>Contains object</option>
@@ -139,7 +139,7 @@
         
             Filter_select.onchange = function() {
                 Filter = Filter_select.value;                
-                if(Filter != '--') {
+                if(Filter != '') {
                 confidence_label.style.display='inline';
                 confidence_numb.style.display='inline';
                 }
@@ -173,31 +173,41 @@
     <script>
         let search_button = document.getElementById('source_button');
         let loading_symbol = document.getElementById('loading');
+        let keywords_text = document.getElementById('keywords');
         
         search_button.onclick = function() {
-            search_button.style.display='none';
-            loading_symbol.style.display='inline';
+            keywords = keywords_text.value;
+            if(keywords != '') {
+                search_button.style.display='none';
+                loading_symbol.style.display='inline';
+            }
         }
         window.onload = function() {
             search_button.style.display='inline';
             loading_symbol.style.display='none';            
         }
+        
     </script>
     <script>
         for (i=0;i < {{count}};i++) {
             var a = i+1
             let apply_button = document.getElementById('apply_button'+a);
             let loading_symbol = document.getElementById('loading'+a);
+            let Filter_select = document.getElementById('Filter'+a);
             
             apply_button.onclick = function() {
-                apply_button.style.display='none';
-                loading_symbol.style.display='inline';
+                Filter = Filter_select.value;
+                if(Filter != '') {
+                    apply_button.style.display='none';
+                    loading_symbol.style.display='inline';
+                }
             }
             window.onload = function() {
                 apply_button.style.display='inline';
                 loading_symbol.style.display='none';            
-            }           
-        }
+            }
+        }           
+        
     </script>
     <script>
             $(window).scroll(function () {

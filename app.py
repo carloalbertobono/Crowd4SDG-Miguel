@@ -100,7 +100,7 @@ def index():
                 
         elif 'apply_button' in request.form:
             if int(request.form['apply_button']) == count:
-                if request.form['Filter_select'] != "--":
+                if request.form['Filter_select'] != "":
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == "Remove memes":
                         attribute = "MemeDetector"
@@ -135,12 +135,12 @@ def index():
                         u.append(p)
                     urls.append(u)                    
                     count+=1
-                else:
-                    flash('Select an option')
-                    applied[count-1]['Filter'] = ""
+                #else:
+                #    flash('Select an option')
+                #    applied[count-1]['Filter'] = ""
             else:
                 sel_count = int(request.form['apply_button'])
-                if request.form['Filter_select'] != "--":
+                if request.form['Filter_select'] != "":
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == "Remove memes":
                         attribute = "MemeDetector"
@@ -177,9 +177,9 @@ def index():
                         u.append(p)
                     urls[sel_count]= u                     
                     
-                else:
-                    flash('Select an option')
-                    applied[sel_count-1]['Filter'] = ""
+                #else:
+                #    flash('Select an option')
+                #    applied[sel_count-1]['Filter'] = ""
         elif 'reset_button' in request.form:
             count = 0
             source_applied = []
