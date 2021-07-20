@@ -216,10 +216,8 @@ def index():
                 
         else:
             #url_download = int(request.form['download_button'])
-            #return redirect(applied[url_download-1]["url"])
-            #print(applied[url_download-1]["url"])
-            #print(applied)
-            #print(url_download)
+            #with open('result1.csv', 'w+', encoding= "utf-8") as file:
+            #    file.write(paths[url_download])            
             pass
     return render_template('index.html', count=count, source_applied=source_applied, urls=urls,
                            applied=applied, number_images=number_images, confidence=confidence)

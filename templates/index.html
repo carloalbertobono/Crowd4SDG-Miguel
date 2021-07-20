@@ -20,7 +20,7 @@
                 <option value="Reddit"{% if source_applied[0].source == "Reddit" %}selected{%endif%}>Reddit</option> -->
             </select>
             <input id="keywords" name="keywords" type="text" {% if count > 0 %} value= '{{source_applied[0].keywords}}' {% endif %} placeholder= "Search keywords" required>
-            <label for="number_pic" style= "margin-left: 20px;">Number of images:</label>
+            <label for="number_pic" style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif;">Number of images:</label>
             <input id="number_pic" name="number_pic" {% if count == 0%} value= 100 {% else %} value= {{number_images}} {% endif %} type="number" min="100" step="100" style="width: 50px;">
             <button id="source_button" type="submit" class="source_button" name="source_button" value="">Search</button> 
             <button id="loading" name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button> <br><br>
@@ -43,10 +43,13 @@
         <div class= "download">
             {% if count > 0 %}
             <form method= "POST">
-                <button type="submit" class="download_button" name="download_button" value= "1" style="float: right;">Download CSV file</button>    
+                <button id= "download_button" type="submit" class="download_button" name="download_button" value= "0" style="float: right;">Download CSV file</button>            
             </form>
             {% endif %}
-        </div><br>        
+        </div><br>
+        <a href= "../result1.csv" download>
+            <button id= "download_csv" type= "button" name= "download_csv" value= "0" style= "display: none;">
+        </a>       
         {% endfor %}    
     </div> 
     <div class= "filters">
@@ -91,7 +94,7 @@
             </select>
             <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
-            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--'%} style= "margin-left: 20px; display: inline;" {% else %} style= "margin-left: 20px; display: none;" {% endif %}>Confidence threshold:</label>
+            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--'%} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold:</label>
             <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="number" min="0" max="1" step="0.01" {% if applied[x].Filter != '' and applied[x].Filter != '--'%} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
             <button id={{"loading"~(x+1)}} name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button>
@@ -114,7 +117,7 @@
         <div class= "download">
             <form method= "POST">
             {% if count > x+1 %}
-                <button type="submit" class="download_button" name="download_button" value={{x+1}} style="float: right;">Download CSV file</button>
+                <button id={{"download_button"~(x+1)}} type="submit" class="download_button" name="download_button" value={{x+1}} style="float: right;">Download CSV file</button>
             {% endif %}    
             </form>
         </div><br>        
@@ -189,6 +192,14 @@
         
     </script>
     <script>
+        let download_button = document.getElementById('download_button');
+        let dowload_csv = document.getElementById('download_csv');
+        
+        download_button.onclick = function() {
+            download_csv.click();
+        }
+    </script>
+    <script>
         for (i=0;i < {{count}};i++) {
             var a = i+1
             let apply_button = document.getElementById('apply_button'+a);
@@ -208,7 +219,7 @@
             }
         }           
         
-    </script>
+    </script>  
     <script>
             $(window).scroll(function () {
             sessionStorage.scrollTop = $(this).scrollTop();
