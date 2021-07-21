@@ -61,7 +61,7 @@ def index():
                 
                 u = []
                 for x in range(len(df)):
-                    p = {"url": df['media_url'].iloc[x]}
+                    p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x]}
                     u.append(p)
                 urls.append(u)
                 #paths.append(url_csv_get.text)
@@ -119,7 +119,7 @@ def index():
                               'csv_file': paths[count-1]
                               }
                         
-                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/filterImage', json=params)
+                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
                     
                     f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                     k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
@@ -161,7 +161,7 @@ def index():
                               'csv_file': paths[sel_count-1]
                               }                        
                     
-                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/filterImage', json=params)
+                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
                     
                     f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                     applied[sel_count-1] = f
@@ -203,7 +203,7 @@ def index():
             #              'column_name': 'media_url',
             #              'csv_file': paths[sel_count-2+x]
             #             }
-            #    r = requests.post(url='http://131.175.120.2:7777/Filter/API/filterImage', json=params)
+            #    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
             #    paths[sel_count-1+x] = r.text
             #    tmp= StringIO(r.text)
             #    df= pd.read_csv(tmp)

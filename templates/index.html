@@ -36,6 +36,11 @@
             <div class="container">
                 {% for u in range(number) %}
                     <img src= {{ urls[0][u].url}} height=100 style="display: inline-block;" loading="lazy"/>
+                    <!--
+                    <div class= "overlay">
+                        <div class= "text"> {{urls[0][u].text}}</div>
+                    </div>
+                    -->
                 {% endfor %}
             </div><br>
         {% endif %}
