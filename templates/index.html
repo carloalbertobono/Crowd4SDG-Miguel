@@ -66,6 +66,7 @@
                 <option value="Remove memes" {% if applied[x].Filter == "Remove memes" %} selected {% endif %}>Remove memes</option>
                 <option value="Scene detector" {% if applied[x].Filter == "Scene detector" %} selected {% endif %}>Scene detector</option>
                 <option value="Contains object" {% if applied[x].Filter == "Contains object" %} selected {% endif %}>Contains object</option>
+                <option value="Tweet location" {% if applied[x].Filter == "Tweet location" %} selected {% endif %}>Tweet location</option>
                 <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>-->
             </select>
             {% for message in get_flashed_messages() %}
@@ -74,7 +75,7 @@
             {% endif %}
             {% endfor %}
             <select id={{"option1"~(x+1)}} name="option1_select" {% if applied[x].Filter == "Scene detector" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <option value="PublicPrivateClassifier" {% if applied[x].Attribute == "Outdoors" %} selected {% endif %}>Outdoors</option>
+                <option value="PublicPrivateClassifier" {% if applied[x].Attribute == "PublicPrivateClassifier" %} selected {% endif %}>Outdoors</option>
                 <!--
                 <option value="Indoors" {% if applied[x].Attribute == "Indoors" %} selected {% endif %}>Indoors</option>
                 <option value="Sea" {% if applied[x].Attribute == "Sea" %} selected {% endif %}>Sea</option>
@@ -83,7 +84,7 @@
                 <option value="Night" {% if applied[x].Attribute == "Night" %} selected {% endif %}>Night</option> -->
             </select>
             <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == "Contains object" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <option value="PeopleDetector" {% if applied[x].Attribute == "Person" %} selected {% endif %}>Person</option>
+                <option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %} selected {% endif %}>Person</option>
                 <!--
                 <option value="Rubble" {% if applied[x].Attribute == "Rubble" %} selected {% endif %}>Rubble</option>
                 <option value="House" {% if applied[x].Attribute == "House" %} selected {% endif %}>House</option>
@@ -94,10 +95,15 @@
                 <option value="Ash" {% if applied[x].Attribute == "Ash" %} selected {% endif %}>Ash</option>
                 <option value="Fire" {% if applied[x].Attribute == "Fire" %} selected {% endif %}>Fire</option>-->
             </select>
+            <select id={{"option3"~(x+1)}} name="option3_select" {% if applied[x].Filter == "Tweet location" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                {% for location in locations[x] %}
+                    <option value='{{location}}' {% if applied[x].Attribute == location %} selected {% endif %}>{{location}}</option>
+                {% endfor %}
+            </select>
             <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
-            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--'%} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold:</label>
-            <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="number" min="0" max="1" step="0.01" {% if applied[x].Filter != '' and applied[x].Filter != '--'%} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
+            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != "Tweet location" %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold:</label>
+            <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="number" min="0" max="1" step="0.01" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != "Tweet location"%} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
             <button id={{"loading"~(x+1)}} name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button>
             <br><br>
@@ -110,7 +116,7 @@
         {% if s.source == 'Twitter' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ tweets[x+1][u].url }} height=100 style="display: inline-block;" loading="lazy"/>
+                    <img src= {{ tweets[x+1][u].url }} height=100 title= '{{tweets[0][u].text}}' style="display: inline-block;" loading="lazy"/>
                 {% endfor %}
             </div><br>
         {% endif %}
@@ -139,6 +145,7 @@
             let Filter_select = document.getElementById('Filter'+a);
             let option1_select = document.getElementById('option1'+a);
             let option2_select = document.getElementById('option2'+a);
+            let option3_select = document.getElementById('option3'+a);
             let latitude_text = document.getElementById('latitude'+a);
             let longitude_text = document.getElementById('longitude'+a);
             let confidence_numb = document.getElementById('confidence'+a);
@@ -146,7 +153,7 @@
         
             Filter_select.onchange = function() {
                 Filter = Filter_select.value;                
-                if(Filter != '') {
+                if(Filter != '' && Filter != 'Tweet location') {
                 confidence_label.style.display='inline';
                 confidence_numb.style.display='inline';
                 }
@@ -165,6 +172,12 @@
                 }
                 else {
                     option2_select.style.display='none';
+                }
+                if(Filter == 'Tweet location') {
+                    option3_select.style.display='inline';
+                }
+                else {
+                    option3_select.style.display='none';
                 }
                 if(Filter == 'Geographic') {
                     latitude_text.style.display='inline';
