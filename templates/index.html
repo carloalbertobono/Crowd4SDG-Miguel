@@ -25,8 +25,8 @@
             <button id="source_button" type="submit" class="source_button" name="source_button" value="">Search</button> 
             <button id="loading" name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button> <br><br>
         </form>
-        {% if urls[0]|length < number_images|int %}
-            {% set number= urls[0]|length %}
+        {% if tweets[0]|length < number_images|int %}
+            {% set number= tweets[0]|length %}
         {% else %}
             {% set number= number_images|int %}
         {% endif %}
@@ -35,10 +35,10 @@
         {% if s.source == 'Twitter' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ urls[0][u].url}} height=100 style="display: inline-block;" loading="lazy"/>
+                    <img src= {{ tweets[0][u].url}} height=100 title= '{{tweets[0][u].text}}' style="display: inline-block;" loading="lazy"/>
                     <!--
                     <div class= "overlay">
-                        <div class= "text"> {{urls[0][u].text}}</div>
+                        <div class= "text"> {{tweets[0][u].text}}</div>
                     </div>
                     -->
                 {% endfor %}
@@ -47,14 +47,11 @@
         {% endif %}
         <div class= "download">
             {% if count > 0 %}
-            <form method= "POST">
-                <button id= "download_button" type="submit" class="download_button" name="download_button" value= "0" style="float: right;">Download CSV file</button>            
-            </form>
+            <a href="/downloadCSV?id=0">
+                <button id= "download_csv" type= "button" name= "download_csv" value= "0" style= "float: right;">Download CSV File</button>
+            </a>            
             {% endif %}
-        </div><br>
-        <a href= "../result1.csv" download>
-            <button id= "download_csv" type= "button" name= "download_csv" value= "0" style= "display: none;">
-        </a>       
+        </div><br>      
         {% endfor %}    
     </div> 
     <div class= "filters">
@@ -107,13 +104,13 @@
         </form>
         {% if applied[x].Filter != "" %}
         {% for s in source_applied %}
-        {% if urls[x+1]|length < number %}
-            {% set number= urls[x+1]|length %}
+        {% if tweets[x+1]|length < number %}
+            {% set number= tweets[x+1]|length %}
         {% endif %}
         {% if s.source == 'Twitter' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ urls[x+1][u].url }} height=100 style="display: inline-block;" loading="lazy"/>
+                    <img src= {{ tweets[x+1][u].url }} height=100 style="display: inline-block;" loading="lazy"/>
                 {% endfor %}
             </div><br>
         {% endif %}
@@ -122,7 +119,9 @@
         <div class= "download">
             <form method= "POST">
             {% if count > x+1 %}
-                <button id={{"download_button"~(x+1)}} type="submit" class="download_button" name="download_button" value={{x+1}} style="float: right;">Download CSV file</button>
+            <a href={{"/downloadCSV?id="~(x+1)}}>
+                <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
+            </a>
             {% endif %}    
             </form>
         </div><br>        
@@ -195,14 +194,6 @@
             loading_symbol.style.display='none';            
         }
         
-    </script>
-    <script>
-        let download_button = document.getElementById('download_button');
-        let dowload_csv = document.getElementById('download_csv');
-        
-        download_button.onclick = function() {
-            download_csv.click();
-        }
     </script>
     <script>
         for (i=0;i < {{count}};i++) {

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect
+from flask import Flask, render_template, request, flash, redirect, Response
 import pandas as pd
 import requests
 from io import StringIO
@@ -14,14 +14,14 @@ app.config['SECRET_KEY'] = 'Hola'
 #url_request31 = io.StringIO(url_request3.content.decode('utf-8'))
 #df = pd.read_csv(url_request31, error_bad_lines=False, index_col=False)
 
-urls = []
+tweets = []
 ##change len(df) to 100
 #for x in range(len(df)):
 #    u = {"url": df['media_url'].iloc[x]}
-#    urls.append(u)
+#    tweets.append(u)
 
 
-paths = []
+csv_contents = []
 applied = []
 source_applied = []
 count = 0
@@ -32,7 +32,7 @@ source_applied.append(s0)
 
 @app.route('/', methods=['GET','POST'])
 def index():
-    global count, applied, source_applied, number_images, urls, paths, confidence
+    global count, applied, source_applied, number_images, tweets, csv_contents, confidence
     if request.method == "POST":
         if 'source_button' in request.form:
             if count == 0:
@@ -63,9 +63,9 @@ def index():
                 for x in range(len(df)):
                     p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x]}
                     u.append(p)
-                urls.append(u)
-                #paths.append(url_csv_get.text)
-                paths.append(r.text)
+                tweets.append(u)
+                #csv_contents.append(url_csv_get.text)
+                csv_contents.append(r.text)
     
                 count+=1
                 
@@ -94,9 +94,9 @@ def index():
                 for x in range(len(df)):
                     p = {"url": df['media_url'].iloc[x]}
                     u.append(p)
-                urls[0]= u                
-                #paths[0]= url_csv_get.text
-                paths[0]= r.text
+                tweets[0]= u                
+                #csv_contents[0]= url_csv_get.text
+                csv_contents[0]= r.text
                 
         elif 'apply_button' in request.form:
             if int(request.form['apply_button']) == count:
@@ -116,7 +116,7 @@ def index():
                               #'confidence_threshold_list': [float(attribute.split()[1])],
                               'confidence_threshold_list': [request.form['confidence']],
                               'column_name': 'media_url',
-                              'csv_file': paths[count-1]
+                              'csv_file': csv_contents[count-1]
                               }
                         
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
@@ -126,14 +126,14 @@ def index():
                     applied[count-1] = f
                     applied.append(k)
                     print(applied)
-                    paths.append(r.text)
+                    csv_contents.append(r.text)
                     tmp= StringIO(r.text)
                     df= pd.read_csv(tmp)
                     u = []
                     for x in range(len(df)):
                         p = {"url": df['media_url'].iloc[x]}
                         u.append(p)
-                    urls.append(u)                    
+                    tweets.append(u)                    
                     count+=1
                 #else:
                 #    flash('Select an option')
@@ -158,7 +158,7 @@ def index():
                               #'confidence_threshold_list': [float(attribute.split()[1])],
                               'confidence_threshold_list': [request.form['confidence']],
                               'column_name': 'media_url',
-                              'csv_file': paths[sel_count-1]
+                              'csv_file': csv_contents[sel_count-1]
                               }                        
                     
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
@@ -166,7 +166,7 @@ def index():
                     f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                     applied[sel_count-1] = f
                     print(applied)
-                    paths[sel_count] = r.text                    
+                    csv_contents[sel_count] = r.text                    
                     #url_csv_get = requests.get(url_csv)
                     #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
                     tmp= StringIO(r.text)
@@ -175,7 +175,7 @@ def index():
                     for x in range(len(df)):
                         p = {"url": df['media_url'].iloc[x]}
                         u.append(p)
-                    urls[sel_count]= u                     
+                    tweets[sel_count]= u                     
                     
                 #else:
                 #    flash('Select an option')
@@ -186,12 +186,12 @@ def index():
             s0 = {'ID': "", 'source': "", 'keywords': ""}
             source_applied.append(s0)
             applied = []
-            urls = []
-            paths = []
+            tweets = []
+            csv_contents = []
         elif 'up_button' in request.form:
             print(len(applied))
-            print(len(urls))
-            print(len(paths))
+            print(len(tweets))
+            print(len(csv_contents))
             #sel_count = int(request.form['up_button'])
             #a = applied[sel_count-2]
             #applied[sel_count-2] = applied[sel_count-1]
@@ -201,26 +201,38 @@ def index():
             #    params = {'filter_name_list': [applied[sel_count-2+x]['Attribute'].split()[0]],
             #              'confidence_threshold_list': [float(applied[sel_count-2+x]['Attribute'].split()[1])],
             #              'column_name': 'media_url',
-            #              'csv_file': paths[sel_count-2+x]
+            #              'csv_file': csv_contents[sel_count-2+x]
             #             }
             #    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
-            #    paths[sel_count-1+x] = r.text
+            #    csv_contents[sel_count-1+x] = r.text
             #    tmp= StringIO(r.text)
             #    df= pd.read_csv(tmp)
             #    u = []
             #    for x in range(len(df)):
             #        p = {"url": df['media_url'].iloc[x]}
             #        u.append(p)
-            #    urls[sel_count-1+x]= u   
+            #    tweets[sel_count-1+x]= u   
             pass
                 
         else:
             #url_download = int(request.form['download_button'])
             #with open('result1.csv', 'w+', encoding= "utf-8") as file:
-            #    file.write(paths[url_download])            
+            #    file.write(csv_contents[url_download])            
             pass
-    return render_template('index.html', count=count, source_applied=source_applied, urls=urls,
+    return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, number_images=number_images, confidence=confidence)
+
+@app.route("/downloadCSV")
+def downloadCSV():
+    #print("length of csv_contents: ", len(csv_contents))
+    #print("int(request.args.get('id')): ", int(request.args.get('id')))
+    #print("csv_contents:\n\n", csv_contents)
+    return Response(
+        csv_contents[int(request.args.get('id'))],
+        mimetype="text/csv",
+        headers={"Content-disposition":
+                 "attachment; filename=download.csv"})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
