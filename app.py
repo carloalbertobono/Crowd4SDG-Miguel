@@ -27,12 +27,13 @@ source_applied = []
 count = 0
 number_images= 100
 confidence= 0.9
+alert = ""
 s0 = {'ID': "", 'source': "", 'keywords': ""}
 source_applied.append(s0)
 
 @app.route('/', methods=['GET','POST'])
 def index():
-    global count, applied, source_applied, number_images, tweets, csv_contents, confidence
+    global count, applied, source_applied, number_images, tweets, csv_contents, confidence, alert
     if request.method == "POST":
         if 'source_button' in request.form:
             if count == 0:
@@ -43,31 +44,35 @@ def index():
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"
                 r = requests.post('http://131.175.120.2:7777/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
-                                        'count': number_images})                
-                s = {'ID': count, 'source': option, 'keywords': keywords}
-                source_applied[0]= s
-                print(source_applied)
-                f = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
-                applied.append(f)
+                                        'count': number_images})   
+                #print("The text is:", r.text, ">")
+                #print(len(r.text))
+                if len(r.text) != 1:
+                    tmp= StringIO(r.text)
+                    df= pd.read_csv(tmp)                    
+                    s = {'ID': count, 'source': option, 'keywords': keywords}
+                    source_applied[0]= s
+                    print(source_applied)
+                    f = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
+                    applied.append(f)
                 
-                #url_csv_get = requests.get(url_csv)
-                #url_request = StringIO(url_csv_get.content.decode('utf-8'))
-                #df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
-                #file = pd.DataFrame.to_csv(df, path_or_buf=(None))
-                #print(df)
-                
-                tmp= StringIO(r.text)
-                df= pd.read_csv(tmp)                
-                
-                u = []
-                for x in range(len(df)):
-                    p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x]}
-                    u.append(p)
-                tweets.append(u)
-                #csv_contents.append(url_csv_get.text)
-                csv_contents.append(r.text)
-    
-                count+=1
+                    #url_csv_get = requests.get(url_csv)
+                    #url_request = StringIO(url_csv_get.content.decode('utf-8'))
+                    #df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
+                    #file = pd.DataFrame.to_csv(df, path_or_buf=(None))
+                    #print(df)
+
+                    u = []
+                    for x in range(len(df)):
+                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x]}
+                        u.append(p)
+                    tweets.append(u)
+                    #csv_contents.append(url_csv_get.text)
+                    csv_contents.append(r.text)
+                    count+=1
+                    alert = ""
+                else:
+                    alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional"
                 
             else:
                 option = request.form['source']
@@ -77,27 +82,31 @@ def index():
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"                
                 r = requests.post('http://131.175.120.2:7777/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
-                                        'count': number_images})                
-                s = {'ID': count, 'source': option, 'keywords': keywords}
-                source_applied[0]= s
-                print(source_applied)
+                                        'count': number_images})
+                #print(len(r.text))
+                if len(r.text) != 1:
+                    tmp= StringIO(r.text)
+                    df= pd.read_csv(tmp)                    
+                    s = {'ID': 0, 'source': option, 'keywords': keywords}
+                    source_applied[0]= s
+                    print(source_applied)
                 
-                #url_csv_get = requests.get(url_csv)
-                #url_request = StringIO(url_csv_get.content.decode('utf-8'))
-                #df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
-                #file = pd.DataFrame.to_csv(df, path_or_buf=(None))
-                
-                tmp= StringIO(r.text)
-                df= pd.read_csv(tmp)                
-                
-                u = []
-                for x in range(len(df)):
-                    p = {"url": df['media_url'].iloc[x]}
-                    u.append(p)
-                tweets[0]= u                
-                #csv_contents[0]= url_csv_get.text
-                csv_contents[0]= r.text
-                
+                    #url_csv_get = requests.get(url_csv)
+                    #url_request = StringIO(url_csv_get.content.decode('utf-8'))
+                    #df = pd.read_csv(url_request, error_bad_lines=False, index_col=False)
+                    #file = pd.DataFrame.to_csv(df, path_or_buf=(None))
+                    
+                    u = []
+                    for x in range(len(df)):
+                        p = {"url": df['media_url'].iloc[x]}
+                        u.append(p)
+                    tweets[0]= u                
+                    #csv_contents[0]= url_csv_get.text
+                    csv_contents[0]= r.text
+                    alert = ""
+                else:
+                    alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional"
+                    #print("alert is read")
         elif 'apply_button' in request.form:
             if int(request.form['apply_button']) == count:
                 if request.form['Filter_select'] != "":
@@ -120,21 +129,25 @@ def index():
                               }
                         
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
-                    
-                    f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
-                    k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
-                    applied[count-1] = f
-                    applied.append(k)
-                    print(applied)
-                    csv_contents.append(r.text)
-                    tmp= StringIO(r.text)
-                    df= pd.read_csv(tmp)
-                    u = []
-                    for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x]}
-                        u.append(p)
-                    tweets.append(u)                    
-                    count+=1
+                    print(len(r.text))
+                    if len(r.text) > 116:
+                        f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
+                        k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
+                        applied[count-1] = f
+                        applied.append(k)
+                        print(applied)
+                        csv_contents.append(r.text)
+                        tmp= StringIO(r.text)
+                        df= pd.read_csv(tmp)
+                        u = []
+                        for x in range(len(df)):
+                            p = {"url": df['media_url'].iloc[x]}
+                            u.append(p)
+                        tweets.append(u)                    
+                        count+=1
+                        alert = ""
+                    else:
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
                 #else:
                 #    flash('Select an option')
                 #    applied[count-1]['Filter'] = ""
@@ -162,21 +175,24 @@ def index():
                               }                        
                     
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
-                    
-                    f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
-                    applied[sel_count-1] = f
-                    print(applied)
-                    csv_contents[sel_count] = r.text                    
-                    #url_csv_get = requests.get(url_csv)
-                    #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
-                    tmp= StringIO(r.text)
-                    df= pd.read_csv(tmp)
-                    u = []
-                    for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x]}
-                        u.append(p)
-                    tweets[sel_count]= u                     
-                    
+                    #print(len(r.text))
+                    if len(r.text) > 116:
+                        f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
+                        applied[sel_count-1] = f
+                        print(applied)
+                        csv_contents[sel_count] = r.text                    
+                        #url_csv_get = requests.get(url_csv)
+                        #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
+                        tmp= StringIO(r.text)
+                        df= pd.read_csv(tmp)
+                        u = []
+                        for x in range(len(df)):
+                            p = {"url": df['media_url'].iloc[x]}
+                            u.append(p)
+                        tweets[sel_count]= u 
+                        alert = ""
+                    else:
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
                 #else:
                 #    flash('Select an option')
                 #    applied[sel_count-1]['Filter'] = ""
@@ -188,6 +204,7 @@ def index():
             applied = []
             tweets = []
             csv_contents = []
+            alert = ""
         elif 'up_button' in request.form:
             print(len(applied))
             print(len(tweets))
@@ -220,7 +237,7 @@ def index():
             #    file.write(csv_contents[url_download])            
             pass
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
-                           applied=applied, number_images=number_images, confidence=confidence)
+                           applied=applied, alert=alert, number_images=number_images, confidence=confidence)
 
 @app.route("/downloadCSV")
 def downloadCSV():

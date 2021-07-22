@@ -187,11 +187,15 @@
             if(keywords != '') {
                 search_button.style.display='none';
                 loading_symbol.style.display='inline';
-            }
+            }            
+            
         }
         window.onload = function() {
             search_button.style.display='inline';
-            loading_symbol.style.display='none';            
+            loading_symbol.style.display='none';
+            if ('{{alert}}' != '') {
+                alert('{{alert}}');
+            }                        
         }
         
     </script>
@@ -211,7 +215,10 @@
             }
             window.onload = function() {
                 apply_button.style.display='inline';
-                loading_symbol.style.display='none';            
+                loading_symbol.style.display='none';
+                if ('{{alert}}' != '') {
+                    alert('{{alert}}');
+                }            
             }
         }           
         
