@@ -77,7 +77,6 @@ def index():
                     print(df_sorted['user_loc'])
                     print(df_sorted['user_loc'].astype(str))
                     print(df_sorted['user_loc'].astype(str).unique())
-                    print(df_sorted['user_loc'].astype(str).unique()[2])
                 else:
                     alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional"
                 
@@ -138,7 +137,7 @@ def index():
                         
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
                     print(len(r.text))
-                    if len(r.text) > 116:
+                    if len(r.text) > 160:
                         f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                         k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
                         applied[count-1] = f
@@ -210,7 +209,7 @@ def index():
                     
                     r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
                     #print(len(r.text))
-                    if len(r.text) > 116:
+                    if len(r.text) > 160:
                         f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                         applied[sel_count-1] = f
                         print(applied)
@@ -263,31 +262,64 @@ def index():
             locations = []
             alert = ""
         elif 'up_button' in request.form:
-            print(len(applied))
-            print(len(tweets))
-            print(len(csv_contents))
-            #sel_count = int(request.form['up_button'])
-            #a = applied[sel_count-2]
-            #applied[sel_count-2] = applied[sel_count-1]
-            #applied[sel_count-1] = a
+            #print(len(applied))
+            #print(len(tweets))
+            #print(len(csv_contents))
+            sel_count = int(request.form['up_button'])
+            #print(sel_count)
+            #print(count)
+            a = applied[sel_count-2]
+            applied[sel_count-2] = applied[sel_count-1]
+            applied[sel_count-1] = a
             
-            #for x in range(count-sel_count+1):
-            #    params = {'filter_name_list': [applied[sel_count-2+x]['Attribute'].split()[0]],
-            #              'confidence_threshold_list': [float(applied[sel_count-2+x]['Attribute'].split()[1])],
-            #              'column_name': 'media_url',
-            #              'csv_file': csv_contents[sel_count-2+x]
-            #             }
-            #    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
-            #    csv_contents[sel_count-1+x] = r.text
-            #    tmp= StringIO(r.text)
-            #    df= pd.read_csv(tmp)
-            #    u = []
-            #    for x in range(len(df)):
-            #        p = {"url": df['media_url'].iloc[x]}
-            #        u.append(p)
-            #    tweets[sel_count-1+x]= u   
-            pass
-                
+            for a in range(count-sel_count+1):
+                if applied[sel_count-2+a]['Filter'] != "Tweet location":
+                    params = {'filter_name_list': [applied[sel_count-2+a]['Attribute']],
+                              'confidence_threshold_list': [applied[sel_count-2+a]['Confidence']],
+                              'column_name': 'media_url',
+                              'csv_file': csv_contents[sel_count-2+a]
+                              }
+                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
+                    if len(r.text) > 160:
+                        print(applied)
+                        csv_contents[sel_count-1+a] = r.text
+                        tmp= StringIO(r.text)
+                        df= pd.read_csv(tmp)
+                        df_sorted = df.sort_values(by=['user_loc'], ascending = True)
+                        locations[sel_count-1+a]= df_sorted['user_loc'].astype(str).unique()                        
+                        u = []
+                        for x in range(len(df)):
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                            u.append(p)
+                        #print(tweets)
+                        #print(tweets[sel_count])
+                        #print(len(tweets))
+                        tweets[sel_count-1+a]= u
+                        alert = ""
+                        #pass
+                    else:
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
+                        break
+                else:
+                    tmp = StringIO(csv_contents[sel_count-2+a])
+                    df0 = pd.read_csv(tmp)
+                    df = df0.loc[df0['user_loc'] == applied[sel_count-2+a]['Attribute']]
+                    csv_string = df.to_csv(encoding= "utf-8")
+                    print("The length is", len(csv_string))
+                    if len(csv_string) > 160:
+                        print("location: ", applied)
+                        df_sorted = df.sort_values(by=['user_loc'], ascending = True)
+                        locations[sel_count-1+a]= df_sorted['user_loc'].astype(str).unique()
+                        u = []
+                        for x in range(len(df)):
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                            u.append(p)
+                        tweets[sel_count-1+a]= u                     
+                        csv_contents[sel_count-1+a]= csv_string
+                        alert = ""
+                    else:
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
+                        break
         else:
             #url_download = int(request.form['download_button'])
             #with open('result1.csv', 'w+', encoding= "utf-8") as file:

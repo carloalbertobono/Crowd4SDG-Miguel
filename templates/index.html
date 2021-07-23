@@ -1,6 +1,6 @@
 {% extends "base_template.html" %}
 
-{% block title %}Prototipe{% endblock %}
+{% block title %}Crows4SDG VisualCit Pipeline Interface{% endblock %}
 
 
 {% block content %}
@@ -58,9 +58,7 @@
         {% if count>0 %}
         {% for x in range(count) %}
         <form method="POST">
-            {% if count > x+1 and x > 0 %}
-            <button type="submit" class= "btn" name= "up_button" value= {{x+1}}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
-            {% endif %}
+            <button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
             <select id={{"Filter"~(x+1)}} name="Filter_select" required>
                 <option value="">-Select-</option>
                 <option value="Remove memes" {% if applied[x].Filter == "Remove memes" %} selected {% endif %}>Remove memes</option>
@@ -216,6 +214,7 @@
         for (i=0;i < {{count}};i++) {
             var a = i+1
             let apply_button = document.getElementById('apply_button'+a);
+            let up_button = document.getElementById('up_button'+a);
             let loading_symbol = document.getElementById('loading'+a);
             let Filter_select = document.getElementById('Filter'+a);
             
@@ -235,7 +234,31 @@
             }
         }           
         
-    </script>  
+    </script>
+    <script>
+        for (i=0; i < {{count}};i++) {
+            var a = i+1
+            let apply_button = document.getElementById('apply_button'+a);
+            let up_button = document.getElementById('up_button'+a);
+            let loading_symbol = document.getElementById('loading'+a);
+            let Filter_select = document.getElementById('Filter'+a);
+
+            up_button.onclick = function() {
+                Filter = Filter_select.value;
+                if(Filter != '') {
+                    apply_button.style.display='none';
+                    loading_symbol.style.display='inline';
+                }            
+            }            
+            window.onload = function() {
+                apply_button.style.display='inline';
+                loading_symbol.style.display='none';
+                if ('{{alert}}' != '') {
+                    alert('{{alert}}');
+                }            
+            }                        
+        }
+    </script> 
     <script>
             $(window).scroll(function () {
             sessionStorage.scrollTop = $(this).scrollTop();
