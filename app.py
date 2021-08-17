@@ -2,10 +2,12 @@ from flask import Flask, render_template, request, flash, redirect, Response
 import pandas as pd
 import requests
 from io import StringIO
+from geopy.geocoders import Nominatim
+from geotext import GeoText
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Hola'
-
+geolocator = Nominatim(user_agent="example app")
 #url_test = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
 #url_new_batch_computer = r"C:\Users\leugi\Documents\TFM\Python\Prototipo4\static\new_batch_2.csv"
 #url_request_new_batch_drive = requests.get("https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1", headers={'User-Agent': 'Mozilla/5.0'})
@@ -61,15 +63,30 @@ def index():
                     #print(df)
                     tmp= StringIO(r.text)
                     df= pd.read_csv(tmp)
-                    df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                    locations.append(df_sorted['user_loc'].astype(str).unique())
+                    df['user_country'] = ""
                     u = []
                     for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                        user_loc = df['user_loc'].iloc[x]
+                        geolocated_text = geolocator.geocode(user_loc, timeout= 10)
+                        if geolocated_text == None:
+                            full_location_list = GeoText(user_loc).cities + GeoText(user_loc).countries
+                            full_location = ''.join(str(e) for e in full_location_list)
+                            geolocated_full_location = geolocator.geocode(full_location, timeout= 10)
+                            if geolocated_full_location == None:
+                                df['user_country'].iloc[x] = 'Not defined'
+                            else:
+                                df['user_country'].iloc[x] = geolocated_full_location.address.split(', ')[-1]
+                        else:
+                            df['user_country'].iloc[x] = geolocated_text.address.split(', ')[-1]
+                            
+                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                         u.append(p)
                     tweets.append(u)
+                    df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                    locations.append(df_sorted['user_country'].astype(str).unique())
+                    csv_string = df.to_csv(encoding= "utf-8")                    
                     #csv_contents.append(url_csv_get.text)
-                    csv_contents.append(r.text)
+                    csv_contents.append(csv_string)
                     count+=1
                     alert = ""
                     print(len(locations))
@@ -101,22 +118,37 @@ def index():
                     #file = pd.DataFrame.to_csv(df, path_or_buf=(None))
                     tmp= StringIO(r.text)
                     df= pd.read_csv(tmp)
-                    df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                    locations[0] = df_sorted['user_loc'].astype(str).unique()
+                    df['user_country'] = ""
                     u = []
                     for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                        user_loc = df['user_loc'].iloc[x]
+                        geolocated_text = geolocator.geocode(user_loc, timeout= 10)
+                        if geolocated_text == None:
+                            full_location_list = GeoText(user_loc).cities + GeoText(user_loc).countries
+                            full_location = ''.join(str(e) for e in full_location_list)
+                            geolocated_full_location = geolocator.geocode(full_location, timeout= 10)
+                            if geolocated_full_location == None:
+                                df['user_country'].iloc[x] = 'Not defined'
+                            else:
+                                df['user_country'].iloc[x] = geolocated_full_location.address.split(', ')[-1]
+                        else:
+                            df['user_country'].iloc[x] = geolocated_text.address.split(', ')[-1]
+                                                
+                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                         u.append(p)
-                    tweets[0]= u                
+                    tweets[0]= u  
+                    df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                    locations[0] = df_sorted['user_country'].astype(str).unique()
+                    csv_string = df.to_csv(encoding= "utf-8")
                     #csv_contents[0]= url_csv_get.text
-                    csv_contents[0]= r.text
+                    csv_contents[0]= csv_string
                     alert = ""
                 else:
                     alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional"
                     #print("alert is read")
         elif 'apply_button' in request.form:
             if int(request.form['apply_button']) == count:
-                if request.form['Filter_select'] != "" and request.form['Filter_select'] != "Tweet location":
+                if request.form['Filter_select'] != "" and request.form['Filter_select'] != "User location":
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == "Remove memes":
                         attribute = "MemeDetector"
@@ -146,11 +178,11 @@ def index():
                         csv_contents.append(r.text)
                         tmp= StringIO(r.text)
                         df= pd.read_csv(tmp)
-                        df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                        locations.append(df_sorted['user_loc'].astype(str).unique())
+                        df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                        locations.append(df_sorted['user_country'].astype(str).unique())
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                             u.append(p)
                         tweets.append(u)                    
                         count+=1
@@ -158,8 +190,8 @@ def index():
                     else:
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
                         
-                elif request.form['Filter_select'] == "Tweet location":
-                    Filter = "Tweet location"
+                elif request.form['Filter_select'] == "User location":
+                    Filter = "User location"
                     attribute = request.form['option3_select']
                     f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                     k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 0.9}
@@ -168,12 +200,12 @@ def index():
                     print(applied)                    
                     tmp = StringIO(csv_contents[count-1])
                     df0 = pd.read_csv(tmp)
-                    df = df0.loc[df0['user_loc'] == attribute]
-                    df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                    locations.append(df_sorted['user_loc'].astype(str).unique())
+                    df = df0.loc[df0['user_country'] == attribute]
+                    df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                    locations.append(df_sorted['user_country'].astype(str).unique())
                     u = []
                     for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                         u.append(p)
                     tweets.append(u)                     
                     csv_string = df.to_csv(encoding= "utf-8")
@@ -186,7 +218,7 @@ def index():
                 #    applied[count-1]['Filter'] = ""
             else:
                 sel_count = int(request.form['apply_button'])
-                if request.form['Filter_select'] != "" and request.form['Filter_select'] != "Tweet location":
+                if request.form['Filter_select'] != "" and request.form['Filter_select'] != "User location":
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == "Remove memes":
                         attribute = "MemeDetector"
@@ -218,31 +250,31 @@ def index():
                         #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
                         tmp= StringIO(r.text)
                         df= pd.read_csv(tmp)
-                        df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                        locations[sel_count]= df_sorted['user_loc'].astype(str).unique()
+                        df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                        locations[sel_count]= df_sorted['user_country'].astype(str).unique()
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                             u.append(p)
                         tweets[sel_count]= u 
                         alert = ""
                     else:
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
                 
-                elif request.form['Filter_select'] == "Tweet location":
-                    Filter = "Tweet location"
+                elif request.form['Filter_select'] == "User location":
+                    Filter = "User location"
                     attribute = request.form['option3_select']
                     f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                     applied[sel_count-1] = f
                     print(applied)                    
                     tmp = StringIO(csv_contents[sel_count-1])
                     df0 = pd.read_csv(tmp)
-                    df = df0.loc[df0['user_loc'] == attribute]
-                    df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                    locations[sel_count]= df_sorted['user_loc'].astype(str).unique()
+                    df = df0.loc[df0['user_country'] == attribute]
+                    df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                    locations[sel_count]= df_sorted['user_country'].astype(str).unique()
                     u = []
                     for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                         u.append(p)
                     tweets[sel_count]= u                     
                     csv_string = df.to_csv(encoding= "utf-8")
@@ -273,7 +305,7 @@ def index():
             applied[sel_count-1] = a
             
             for a in range(count-sel_count+1):
-                if applied[sel_count-2+a]['Filter'] != "Tweet location":
+                if applied[sel_count-2+a]['Filter'] != "User location":
                     params = {'filter_name_list': [applied[sel_count-2+a]['Attribute']],
                               'confidence_threshold_list': [applied[sel_count-2+a]['Confidence']],
                               'column_name': 'media_url',
@@ -285,11 +317,11 @@ def index():
                         csv_contents[sel_count-1+a] = r.text
                         tmp= StringIO(r.text)
                         df= pd.read_csv(tmp)
-                        df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                        locations[sel_count-1+a]= df_sorted['user_loc'].astype(str).unique()                        
+                        df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                        locations[sel_count-1+a]= df_sorted['user_country'].astype(str).unique()                        
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                             u.append(p)
                         #print(tweets)
                         #print(tweets[sel_count])
@@ -303,16 +335,16 @@ def index():
                 else:
                     tmp = StringIO(csv_contents[sel_count-2+a])
                     df0 = pd.read_csv(tmp)
-                    df = df0.loc[df0['user_loc'] == applied[sel_count-2+a]['Attribute']]
+                    df = df0.loc[df0['user_country'] == applied[sel_count-2+a]['Attribute']]
                     csv_string = df.to_csv(encoding= "utf-8")
                     print("The length is", len(csv_string))
                     if len(csv_string) > 160:
                         print("location: ", applied)
-                        df_sorted = df.sort_values(by=['user_loc'], ascending = True)
-                        locations[sel_count-1+a]= df_sorted['user_loc'].astype(str).unique()
+                        df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                        locations[sel_count-1+a]= df_sorted['user_country'].astype(str).unique()
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_loc": df['user_loc'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
                             u.append(p)
                         tweets[sel_count-1+a]= u                     
                         csv_contents[sel_count-1+a]= csv_string
