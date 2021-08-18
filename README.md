@@ -1,6 +1,9 @@
 # Crowd4SDG-Miguel
 In order to run this interface:
 
+- Install these two required packages (this step needs only to be done once):
+    pip install geopy
+    pip intsall geotext
 - Type: 
     export FLASK_APP=app.py
 - Run the flask app by typing:
