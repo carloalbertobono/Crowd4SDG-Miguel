@@ -46,7 +46,7 @@ def index():
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"
                 r = requests.post('http://131.175.120.2:7777/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
-                                        'count': number_images})   
+                                        'count': number_images})
                 #print("The text is:", r.text, ">")
                 #print(len(r.text))
                 if len(r.text) != 1:                    
@@ -66,6 +66,11 @@ def index():
                     df['user_country'] = ""
                     u = []
                     for x in range(len(df)):
+                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x],
+                             "user_country": df['user_country'].iloc[x]}
+                        u.append(p)
+                        continue  # TODO: we are bypassing geo enrichment her
+
                         user_loc = df['user_loc'].iloc[x]
                         geolocated_text = geolocator.geocode(user_loc, timeout= 10)
                         if geolocated_text == None:
@@ -78,9 +83,8 @@ def index():
                                 df['user_country'].iloc[x] = geolocated_full_location.address.split(', ')[-1]
                         else:
                             df['user_country'].iloc[x] = geolocated_text.address.split(', ')[-1]
-                            
-                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x]}
-                        u.append(p)
+
+
                     tweets.append(u)
                     df_sorted = df.sort_values(by=['user_country'], ascending = True)
                     locations.append(df_sorted['user_country'].astype(str).unique())
@@ -96,7 +100,7 @@ def index():
                     print(df_sorted['user_loc'].astype(str).unique())
                 else:
                     alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional"
-                
+
             else:
                 option = request.form['source']
                 keywords = request.form['keywords']
