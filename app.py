@@ -33,6 +33,11 @@ alert = ""
 s0 = {'ID': "", 'source': "", 'keywords': ""}
 source_applied.append(s0)
 
+server = '131.175.120.2:7777'
+test = '127.0.0.1:8000'
+
+address = test
+
 @app.route('/', methods=['GET','POST'])
 def index():
     global count, applied, source_applied, number_images, tweets, csv_contents, confidence, alert, locations
@@ -44,7 +49,7 @@ def index():
                 number_images = request.form['number_pic']
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETUZnzuvqtlHv0iHyyOI0MYBO7O1yFXIqu0QPeIhHUJZnw?Download=1"
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"
-                r = requests.post('http://131.175.120.2:7777/Crawler/API/CrawlCSV',
+                r = requests.post('http://'+address+'/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
                                         'count': number_images})
                 #print("The text is:", r.text, ">")
@@ -107,7 +112,7 @@ def index():
                 number_images = request.form['number_pic']
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETUZnzuvqtlHv0iHyyOI0MYBO7O1yFXIqu0QPeIhHUJZnw?Download=1"
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"                
-                r = requests.post('http://131.175.120.2:7777/Crawler/API/CrawlCSV',
+                r = requests.post('http://'+address+'/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
                                         'count': number_images})
                 #print(len(r.text))
@@ -160,6 +165,11 @@ def index():
                         attribute = request.form['option1_select']
                     elif request.form['Filter_select'] == "Contains object":
                         attribute = request.form['option2_select']
+                    elif request.form['Filter_select'] == "Flood classifier":
+                        attribute = "FloodClassifier"
+                    elif request.form['Filter_select'] == "NSFW filter":
+                        attribute = "NSFWClassifier"
+
                     #else:
                     #    attribute = [request.form['latitude_text'], request.form['longitude_text']]
                     confidence = request.form['confidence']
@@ -171,7 +181,9 @@ def index():
                               'csv_file': csv_contents[count-1]
                               }
                         
-                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
+                    r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
+                    print("###", params)
+
                     print(len(r.text))
                     if len(r.text) > 160:
                         f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
@@ -230,6 +242,10 @@ def index():
                         attribute = request.form['option1_select']
                     elif request.form['Filter_select'] == "Contains object":
                         attribute = request.form['option2_select']
+                    elif request.form['Filter_select'] == "Flood classifier":
+                        attribute = "FloodClassifier"
+                    elif request.form['Filter_select'] == "NSFW filter":
+                        attribute = "NSFWClassifier"
                     else:
                         attribute = [request.form['latitude_text'], request.form['longitude_text']]
                     confidence = request.form['confidence']
@@ -243,7 +259,7 @@ def index():
                               'csv_file': csv_contents[sel_count-1]
                               }                        
                     
-                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
+                    r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
                     #print(len(r.text))
                     if len(r.text) > 160:
                         f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
@@ -315,7 +331,7 @@ def index():
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
-                    r = requests.post(url='http://131.175.120.2:7777/Filter/API/FilterCSV', json=params)
+                    r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
                     if len(r.text) > 160:
                         print(applied)
                         csv_contents[sel_count-1+a] = r.text
