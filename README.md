@@ -1,6 +1,10 @@
 # Crowd4SDG-Miguel
 In order to run this interface:
 
+- Create a nice virtual environment 
+   - virtualenv VIRTUAL
+   - source VIRTUAL/bin/activate
+
 - Install these two required packages (this step needs only to be done once):
    - pip install pandas
    - pip install flask
@@ -9,7 +13,7 @@ In order to run this interface:
 - Type: 
    - export FLASK_APP=app.py
 - Run the flask app by typing:
-   - flask run --port 2000
+   - flask run -host 0.0.0.0 --port 2000
 
 
 In order to use this interface:

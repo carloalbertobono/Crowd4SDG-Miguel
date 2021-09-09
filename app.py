@@ -34,10 +34,10 @@ alert = ""
 s0 = {'ID': "", 'source': "", 'keywords': ""}
 source_applied.append(s0)
 
-server = '131.175.120.2:7777'
+server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
 
-address = test
+address = server
 
 def failsafe(df):
     if 'user_country' not in df:
