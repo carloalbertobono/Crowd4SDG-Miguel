@@ -135,7 +135,7 @@
         <div class= "download" style="float: right;padding:10;">
             <form method= "POST">
             {% if count > x+1 %}
-            items: {{tweets[0]|length }} &nbsp;<!-- items counter -->
+            items: {{tweets[x+1]|length }} &nbsp;<!-- items counter -->
             <a href={{"/downloadCSV?id="~(x+1)}}>
                 <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
             </a>
