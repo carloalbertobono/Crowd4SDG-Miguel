@@ -44,7 +44,7 @@
             </div>
         {% endif %}
         {% endif %}
-        <div class= "download" style="float: right;padding:10;">
+        <div class= "download" style="float: right;">
             items: {{ tweets[0]|length }} &nbsp;<!-- items counter -->
             {% if count > 0 %}
             <a href="/downloadCSV?id=0">
@@ -133,7 +133,7 @@
         {% endfor %}
 
         {% endif %}
-        <div class= "download" style="float: right;padding:10;">
+        <div class= "download" style="float: right;">
             <form method= "POST">
             {% if count > x+1 %}
             items: {{tweets[x+1]|length }} &nbsp;<!-- items counter -->
