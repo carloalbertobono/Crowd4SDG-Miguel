@@ -4,6 +4,7 @@ import requests
 from io import StringIO
 from geopy.geocoders import Nominatim
 from geotext import GeoText
+from config import *
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Hola'
@@ -47,6 +48,7 @@ def failsafe(df):
 @app.route('/', methods=['GET','POST'])
 def index():
     global count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations
+    tags = get_tags()
     if request.method == "POST":
         # Before the crawling
         if 'source_button' in request.form:
@@ -174,9 +176,9 @@ def index():
             if int(request.form['apply_button']) == count:
                 if request.form['Filter_select'] != "" and request.form['Filter_select'] != "User location":
                     Filter = request.form['Filter_select']
-                    if request.form['Filter_select'] == "Remove duplicates":
+                    if request.form['Filter_select'] == d['duplicates_tag']:
                         attribute = "PHashDeduplicator"
-                    elif request.form['Filter_select'] == "Remove non-photos":
+                    elif request.form['Filter_select'] == d['meme']:
                         attribute = "MemeDetector"
                     elif request.form['Filter_select'] == "Scene detector":
                         attribute = request.form['option1_select']
@@ -184,7 +186,7 @@ def index():
                         attribute = request.form['option2_select']
                     elif request.form['Filter_select'] == "Flood classifier":
                         attribute = "FloodClassifier"
-                    elif request.form['Filter_select'] == "NSFW filter":
+                    elif request.form['Filter_select'] == d["nsfw_tag"]:
                         attribute = "NSFWClassifier"
                     elif request.form['Filter_select'] == "Add post location (CIME)":
                         attribute = "CimeAugmenter"
@@ -262,9 +264,9 @@ def index():
                 sel_count = int(request.form['apply_button'])
                 if request.form['Filter_select'] != "" and request.form['Filter_select'] != "User location":
                     Filter = request.form['Filter_select']
-                    if request.form['Filter_select'] == "Remove duplicates":
+                    if request.form['Filter_select'] == d['duplicates_tag']:
                         attribute = "PHashDeduplicator"
-                    elif request.form['Filter_select'] == "Remove non-photos":
+                    elif request.form['Filter_select'] == d['meme']:
                         attribute = "MemeDetector"
                     elif request.form['Filter_select'] == "Scene detector":
                         attribute = request.form['option1_select']
@@ -272,7 +274,7 @@ def index():
                         attribute = request.form['option2_select']
                     elif request.form['Filter_select'] == "Flood classifier":
                         attribute = "FloodClassifier"
-                    elif request.form['Filter_select'] == "NSFW filter":
+                    elif request.form['Filter_select'] == d["nsfw_tag"]:
                         attribute = "NSFWClassifier"
                     elif request.form['Filter_select'] == "Add post location (CIME)":
                         attribute = "CimeAugmenter"
@@ -439,5 +441,9 @@ def downloadCSV():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=True)
+
+@app.context_processor
+def inject_tags():
+    return get_tags()
 

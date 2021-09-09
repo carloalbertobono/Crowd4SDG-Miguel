@@ -44,7 +44,8 @@
             </div>
         {% endif %}
         {% endif %}
-        <div class= "download">
+        <div class= "download" style="float: right;padding:10;">
+            items: {{ tweets[0]|length }} &nbsp;<!-- items counter -->
             {% if count > 0 %}
             <a href="/downloadCSV?id=0">
                 <button id= "download_csv" type= "button" name= "download_csv" value= "0" style= "float: right;">Download CSV File</button>
@@ -52,7 +53,7 @@
             {% endif %}
         </div>
         {% endfor %}
-        items: {{tweets[0]|length }} <!-- items counter -->
+
     </div> 
     <div class= "filters">
         {% if count>0 %}
@@ -61,12 +62,12 @@
             <button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
             <select id={{"Filter"~(x+1)}} name="Filter_select" required>
                 <option value="">-Select-</option>
-                <option value="Remove duplicates" {% if applied[x].Filter == "Remove duplicates" %} selected {% endif %}>Remove duplicates</option>
-                <option value="Remove non-photos" {% if applied[x].Filter == "Remove non-photos" %} selected {% endif %}>Remove non-photos</option>
+                <option value="{{ duplicates_tag }}" {% if applied[x].Filter == duplicates_tag %} selected {% endif %}>{{ duplicates_tag }}</option>
+                <option value="{{ nsfw_tag }}" {% if applied[x].Filter == nsfw_tag %} selected {% endif %}>{{ nsfw_tag }}</option>
+                <option value="{{ meme }}" {% if applied[x].Filter == meme %} selected {% endif %}>{{ meme }}</option>
                 <option value="Scene detector" {% if applied[x].Filter == "Scene detector" %} selected {% endif %}>Scene detector</option>
                 <option value="Contains object" {% if applied[x].Filter == "Contains object" %} selected {% endif %}>Contains object</option>
                 <option value="Flood classifier" {% if applied[x].Filter == "Flood classifier" %} selected {% endif %}>Flood classifier</option>
-                <option value="NSFW filter" {% if applied[x].Filter == "NSFW filter" %} selected {% endif %}>NSFW filter</option>
                 <option value="Add post location (CIME)" {% if applied[x].Filter == "Add post location (CIME)" %} selected {% endif %}>Add post location (CIME)</option>
                 <option value="Add user country" {% if applied[x].Filter == "Add user country" %} selected {% endif %}>Add user country</option>
                 <option value="User location" {% if applied[x].Filter == "User location" %} selected {% endif %}>User location</option>
@@ -129,11 +130,12 @@
 
         {% endif %}
         {% endfor %}
-        items: {{tweets[x+1]|length }} <!-- items counter -->
+
         {% endif %}
-        <div class= "download">
+        <div class= "download" style="float: right;padding:10;">
             <form method= "POST">
             {% if count > x+1 %}
+            items: {{tweets[0]|length }} &nbsp;<!-- items counter -->
             <a href={{"/downloadCSV?id="~(x+1)}}>
                 <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
             </a>
