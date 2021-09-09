@@ -109,6 +109,7 @@
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
             <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != "Add post location (CIME)" and applied[x].Filter != "Add user country" and applied[x].Filter != "User location" %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold (%):</label>
             <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="int" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != "Add post location (CIME)" and applied[x].Filter != "Add user country" and applied[x].Filter != "User location" %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
+            <input id={{"bit"~(x+1)}} name="bit" value=8 type="int" min="0" max="10" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
             <button id={{"loading"~(x+1)}} name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button>
             <br><br>
@@ -157,6 +158,7 @@
             let option1_select = document.getElementById('option1'+a);
             let option2_select = document.getElementById('option2'+a);
             let option3_select = document.getElementById('option3'+a);
+            let bit_select = document.getElementById('bit'+a);
             let latitude_text = document.getElementById('latitude'+a);
             let longitude_text = document.getElementById('longitude'+a);
             let confidence_numb = document.getElementById('confidence'+a);
@@ -164,13 +166,19 @@
 
             Filter_select.onchange = function() {
                 Filter = Filter_select.value;                
-                if(Filter != '' && Filter != 'User location' && Filter != 'Add post location (CIME)' && Filter != 'Add user country' && Filter != 'Remove duplicates' ) {
+                if(Filter != '' && Filter != 'User location' && Filter != 'Add post location (CIME)' && Filter != 'Add user country' && Filter != '{{ duplicates_tag }}' ) {
                 confidence_label.style.display='inline';
                 confidence_numb.style.display='inline';
                 }
                 else {
                 confidence_label.style.display='none';
                 confidence_numb.style.display='none';                
+                }
+                if(Filter == '{{ duplicates_tag }}') {
+                    bit_select.style.display='inline';
+                }
+                else {
+                    bit_select.style.display='none';
                 }
                 if(Filter == 'Scene detector') {
                     option1_select.style.display='inline';
