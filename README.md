@@ -8,6 +8,7 @@ In order to run this interface:
 - Install these two required packages (this step needs only to be done once):
    - pip install pandas
    - pip install flask
+   - pip install Flask-Session
    - pip install geopy
    - pip install geotext
 - Type: 
