@@ -184,7 +184,7 @@ def index():
         # After the crawling
         elif 'apply_button' in request.form:
             if int(request.form['apply_button']) == count:
-                if request.form['Filter_select'] != "" and request.form['Filter_select'] != "User location":
+                if request.form['Filter_select'] != "" and request.form['Filter_select'] != d['user_location_sel_tag'] :
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == d['duplicates_tag']:
                         attribute = "PHashDeduplicator"
@@ -238,8 +238,8 @@ def index():
                     else:
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
                         
-                elif request.form['Filter_select'] == "User location":
-                    Filter = "User location"
+                elif request.form['Filter_select'] == d['user_location_sel_tag'] :
+                    Filter = d['user_location_sel_tag']
                     attribute = request.form['option3_select']
                     f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
                     k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 90}
@@ -268,7 +268,7 @@ def index():
                 #    applied[count-1]['Filter'] = ""
             else:
                 sel_count = int(request.form['apply_button'])
-                if request.form['Filter_select'] != "" and request.form['Filter_select'] != "User location":
+                if request.form['Filter_select'] != "" and request.form['Filter_select'] != d['user_location_sel_tag'] :
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == d['duplicates_tag']:
                         attribute = "PHashDeduplicator"
@@ -325,8 +325,8 @@ def index():
                     else:
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
                 
-                elif request.form['Filter_select'] == "User location":
-                    Filter = "User location"
+                elif request.form['Filter_select'] == d['user_location_sel_tag'] :
+                    Filter = d['user_location_sel_tag']
                     attribute = request.form['option3_select']
                     f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
                     applied[sel_count-1] = f                  
@@ -368,7 +368,7 @@ def index():
             applied[sel_count-1] = a
             
             for a in range(count-sel_count+1):
-                if applied[sel_count-2+a]['Filter'] != "User location":
+                if applied[sel_count-2+a]['Filter'] != d['user_location_sel_tag'] :
                     params = {'filter_name_list': [applied[sel_count-2+a]['Attribute']],
                               'confidence_threshold_list': [applied[sel_count-2+a]['Confidence']],
                               'column_name': 'media_url',
