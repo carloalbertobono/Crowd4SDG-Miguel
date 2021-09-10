@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, flash, redirect, Response, session
-from flask_session import Session
 import pandas as pd
 import requests
 from io import StringIO
