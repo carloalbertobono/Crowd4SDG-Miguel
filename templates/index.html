@@ -3,8 +3,10 @@
 {% block title %}Crows4SDG VisualCit Pipeline Interface{% endblock %}
 
 {% block content %}
-    <div class= "banner_box">
+    <div class= "banner_box vertical-center">
         <img src="/static/images/Crowd4SDG.png" style="height: 45px;">
+        &nbsp;&nbsp;&nbsp;
+        <img src="/static/images/Logo_polimi.png" style="height: 45px;">
     </div>
     <h1 class= "logo">
         <img src="/static/images/VisualCit.png" style="height: 60px;">   
@@ -44,13 +46,14 @@
             </div>
         {% endif %}
         {% endif %}
-        <div class= "download" style="float: right;">
-            items: {{ tweets[0]|length }} &nbsp;<!-- items counter -->
+        <div class= "download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
             {% if count > 0 %}
             <a href="/downloadCSV?id=0">
                 <button id= "download_csv" type= "button" name= "download_csv" value= "0" style= "float: right;">Download CSV File</button>
-            </a>            
+            </a>
+            </br></br><label2>{{ tweets[0]|length }} items returned</label2>
             {% endif %}
+
         </div></br></br>
         {% endfor %}
 
@@ -65,12 +68,12 @@
                 <option value="{{ duplicates_tag }}" {% if applied[x].Filter == duplicates_tag %} selected {% endif %}>{{ duplicates_tag }}</option>
                 <option value="{{ nsfw_tag }}" {% if applied[x].Filter == nsfw_tag %} selected {% endif %}>{{ nsfw_tag }}</option>
                 <option value="{{ meme }}" {% if applied[x].Filter == meme %} selected {% endif %}>{{ meme }}</option>
-                <option value="Scene detector" {% if applied[x].Filter == "Scene detector" %} selected {% endif %}>Scene detector</option>
-                <option value="Contains object" {% if applied[x].Filter == "Contains object" %} selected {% endif %}>Contains object</option>
-                <option value="Flood classifier" {% if applied[x].Filter == "Flood classifier" %} selected {% endif %}>Flood classifier</option>
-                <option value="Add post location (CIME)" {% if applied[x].Filter == "Add post location (CIME)" %} selected {% endif %}>Add post location (CIME)</option>
-                <option value="Add user country" {% if applied[x].Filter == "Add user country" %} selected {% endif %}>Add user country</option>
-                <option value="User location" {% if applied[x].Filter == "User location" %} selected {% endif %}>User location</option>
+                <option value="{{ scene_tag }}" {% if applied[x].Filter == scene_tag %} selected {% endif %}>{{ scene_tag }}</option>
+                <option value="{{ object_tag }}" {% if applied[x].Filter == object_tag %} selected {% endif %}>{{ object_tag }}</option>
+                <option value="{{ flood_tag }}" {% if applied[x].Filter == flood_tag %} selected {% endif %}>{{ flood_tag }}</option>
+                <option value="{{ post_location_tag }}" {% if applied[x].Filter == post_location_tag %} selected {% endif %}>{{ post_location_tag }}</option>
+                <option value="{{ user_location_tag }}" {% if applied[x].Filter == user_location_tag %} selected {% endif %}>{{ user_location_tag }}</option>
+                <option value="{{ user_location_sel_tag }}" {% if applied[x].Filter == user_location_sel_tag %} selected {% endif %}>{{ user_location_sel_tag }}</option>
 
                 <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>-->
             </select>
@@ -79,7 +82,7 @@
             <span style="color: red;">{{ message }}</span>
             {% endif %}
             {% endfor %}
-            <select id={{"option1"~(x+1)}} name="option1_select" {% if applied[x].Filter == "Scene detector" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+            <select id={{"option1"~(x+1)}} name="option1_select" {% if applied[x].Filter == scene_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
                 <option value="PublicPrivateClassifier" {% if applied[x].Attribute == "PublicPrivateClassifier" %} selected {% endif %}>Outdoors</option>
                 <!--
                 <option value="Indoors" {% if applied[x].Attribute == "Indoors" %} selected {% endif %}>Indoors</option>
@@ -88,7 +91,7 @@
                 <option value="Day" {% if applied[x].Attribute == "Day" %} selected {% endif %}>Day</option>
                 <option value="Night" {% if applied[x].Attribute == "Night" %} selected {% endif %}>Night</option> -->
             </select>
-            <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == "Contains object" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+            <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == object_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
                 <option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %} selected {% endif %}>Person</option>
                 <!--
                 <option value="Rubble" {% if applied[x].Attribute == "Rubble" %} selected {% endif %}>Rubble</option>
@@ -100,15 +103,15 @@
                 <option value="Ash" {% if applied[x].Attribute == "Ash" %} selected {% endif %}>Ash</option>
                 <option value="Fire" {% if applied[x].Attribute == "Fire" %} selected {% endif %}>Fire</option>-->
             </select>
-            <select id={{"option3"~(x+1)}} name="option3_select" {% if applied[x].Filter == "User location" %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+            <select id={{"option3"~(x+1)}} name="option3_select" {% if applied[x].Filter == user_location_sel_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
                 {% for location in locations[x] %}
                     <option value='{{location}}' {% if applied[x].Attribute == location %} selected {% endif %}>{{location}}</option>
                 {% endfor %}
             </select>
             <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
-            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != "Add post location (CIME)" and applied[x].Filter != "Add user country" and applied[x].Filter != "User location" %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold (%):</label>
-            <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="int" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != "Add post location (CIME)" and applied[x].Filter != "Add user country" and applied[x].Filter != "User location" %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
+            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold (%):</label>
+            <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="int" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <input id={{"bit"~(x+1)}} name="bit" value=8 type="int" min="0" max="10" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
             <button id={{"loading"~(x+1)}} name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button>
@@ -133,14 +136,14 @@
         {% endfor %}
 
         {% endif %}
-        <div class= "download" style="float: right;">
+        <div class= "download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
             <form method= "POST">
             {% if count > x+1 %}
-            items: {{tweets[x+1]|length }} &nbsp;<!-- items counter -->
             <a href={{"/downloadCSV?id="~(x+1)}}>
                 <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
             </a>
-            {% endif %}    
+            </br></br><label2>{{ tweets[x+1]|length }} items returned</label2>
+            {% endif %}
             </form>
         </div></br></br>
         {% endfor %}
@@ -166,7 +169,7 @@
 
             Filter_select.onchange = function() {
                 Filter = Filter_select.value;                
-                if(Filter != '' && Filter != 'User location' && Filter != 'Add post location (CIME)' && Filter != 'Add user country' && Filter != '{{ duplicates_tag }}' ) {
+                if(Filter != '' && Filter != '{{ user_location_sel_tag }}' && Filter != '{{ post_location_tag }}' && Filter != '{{ user_location_tag }}' && Filter != '{{ duplicates_tag }}' ) {
                 confidence_label.style.display='inline';
                 confidence_numb.style.display='inline';
                 }
@@ -180,19 +183,19 @@
                 else {
                     bit_select.style.display='none';
                 }
-                if(Filter == 'Scene detector') {
+                if(Filter == '{{ scene_tag }}') {
                     option1_select.style.display='inline';
                 }
                 else {
                     option1_select.style.display='none';
                 }
-                if(Filter == 'Contains object') {
+                if(Filter == '{{ object_tag }}') {
                     option2_select.style.display='inline';
                 }
                 else {
                     option2_select.style.display='none';
                 }
-                if(Filter == 'User location') {
+                if(Filter == '{{ user_location_sel_tag }}') {
                     option3_select.style.display='inline';
                 }
                 else {

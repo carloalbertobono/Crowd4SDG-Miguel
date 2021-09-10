@@ -190,15 +190,15 @@ def index():
                         attribute = "PHashDeduplicator"
                     elif request.form['Filter_select'] == d['meme']:
                         attribute = "MemeDetector"
-                    elif request.form['Filter_select'] == "Scene detector":
+                    elif request.form['Filter_select'] == d['scene_tag']:
                         attribute = request.form['option1_select']
-                    elif request.form['Filter_select'] == "Contains object":
+                    elif request.form['Filter_select'] == d['object_tag']:
                         attribute = request.form['option2_select']
-                    elif request.form['Filter_select'] == "Flood classifier":
+                    elif request.form['Filter_select'] == d['flood_tag']:
                         attribute = "FloodClassifier"
                     elif request.form['Filter_select'] == d["nsfw_tag"]:
                         attribute = "NSFWClassifier"
-                    elif request.form['Filter_select'] == "Add post location (CIME)":
+                    elif request.form['Filter_select'] == d['post_location_tag']:
                         attribute = "CimeAugmenter"
                     elif request.form['Filter_select'] == "Add user country":
                         attribute = "GeotextAugmenter"
@@ -274,15 +274,15 @@ def index():
                         attribute = "PHashDeduplicator"
                     elif request.form['Filter_select'] == d['meme']:
                         attribute = "MemeDetector"
-                    elif request.form['Filter_select'] == "Scene detector":
+                    elif request.form['Filter_select'] == d['scene_tag']:
                         attribute = request.form['option1_select']
-                    elif request.form['Filter_select'] == "Contains object":
+                    elif request.form['Filter_select'] == d['object_tag']:
                         attribute = request.form['option2_select']
-                    elif request.form['Filter_select'] == "Flood classifier":
+                    elif request.form['Filter_select'] == d['flood_tag']:
                         attribute = "FloodClassifier"
                     elif request.form['Filter_select'] == d["nsfw_tag"]:
                         attribute = "NSFWClassifier"
-                    elif request.form['Filter_select'] == "Add post location (CIME)":
+                    elif request.form['Filter_select'] == d['post_location_tag']:
                         attribute = "CimeAugmenter"
                     elif request.form['Filter_select'] == "Add user country":
                         attribute = "GeotextAugmenter"
