@@ -434,6 +434,11 @@ def downloadCSV():
     #print("length of csv_contents: ", len(csv_contents))
     #print("int(request.args.get('id')): ", int(request.args.get('id')))
     #print("csv_contents:\n\n", csv_contents)
+
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+        session)
+
+
     return Response(
         csv_contents[int(request.args.get('id'))],
         mimetype="text/csv",

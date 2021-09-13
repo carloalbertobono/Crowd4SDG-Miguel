@@ -3,15 +3,24 @@
 {% block title %}Crows4SDG VisualCit Pipeline Interface{% endblock %}
 
 {% block content %}
-    <div class= "banner_box vertical-center">
-        <img src="/static/images/Crowd4SDG.png" style="height: 45px;">
-        &nbsp;&nbsp;&nbsp;
-        <img src="/static/images/Logo_polimi.png" style="height: 45px;">
+<div class="content">
+
+    <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center;">
+        <div>
+          <img src="/static/images/Crowd4SDG.png" style="height: 45px;flex-basis: 25%;">
+        </div>
+        <div style="flex-basis: 7%;">
+          &nbsp;
+        </div>
+        <div>
+          <img src="/static/images/Logo_polimi.png" style="height: 45px;flex-basis: 25%;">
+        </div>
     </div>
     <h1 class= "logo">
         <img src="/static/images/VisualCit.png" style="height: 60px;">   
         Pipeline Interface 
     </h1>
+    </br>
     <div class= "source">
         <form method="POST">
             <select id="source" name="source">
@@ -36,7 +45,7 @@
         {% if s.source == 'Twitter' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ tweets[0][u].url}} height=100 title= '{{tweets[0][u].text + "\n\nUser location: " + tweets[0][u].user_country + "\n\nTweet location: " + tweets[0][u].tweet_location}}' style="display: inline-block;" loading="lazy"/>
+                    <img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text + "\n\nUser location: " + tweets[0][u].user_country + "\n\nTweet location: " + tweets[0][u].tweet_location}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/>
                     <!--
                     <div class= "overlay">
                         <div class= "text"> {{tweets[0][u].text}}</div>
@@ -46,12 +55,13 @@
             </div>
         {% endif %}
         {% endif %}
+        </br>
         <div class= "download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
             {% if count > 0 %}
+            <label2><font size="2">{{ tweets[0]|length }} items returned</font></label2>&nbsp;&nbsp;&nbsp;
             <a href="/downloadCSV?id=0">
-                <button id= "download_csv" type= "button" name= "download_csv" value= "0" style= "float: right;">Download CSV File</button>
+                <button id= "download_csv" type="button" name="download_csv" value= "0" style= "float: right;">Download CSV File</button>
             </a>
-            </br></br><label2>{{ tweets[0]|length }} items returned</label2>
             {% endif %}
 
         </div></br></br>
@@ -65,15 +75,22 @@
             <button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
             <select id={{"Filter"~(x+1)}} name="Filter_select" required>
                 <option value="">-Select-</option>
-                <option value="{{ duplicates_tag }}" {% if applied[x].Filter == duplicates_tag %} selected {% endif %}>{{ duplicates_tag }}</option>
-                <option value="{{ nsfw_tag }}" {% if applied[x].Filter == nsfw_tag %} selected {% endif %}>{{ nsfw_tag }}</option>
-                <option value="{{ meme }}" {% if applied[x].Filter == meme %} selected {% endif %}>{{ meme }}</option>
-                <option value="{{ scene_tag }}" {% if applied[x].Filter == scene_tag %} selected {% endif %}>{{ scene_tag }}</option>
-                <option value="{{ object_tag }}" {% if applied[x].Filter == object_tag %} selected {% endif %}>{{ object_tag }}</option>
-                <option value="{{ flood_tag }}" {% if applied[x].Filter == flood_tag %} selected {% endif %}>{{ flood_tag }}</option>
-                <option value="{{ post_location_tag }}" {% if applied[x].Filter == post_location_tag %} selected {% endif %}>{{ post_location_tag }}</option>
-                <option value="{{ user_location_tag }}" {% if applied[x].Filter == user_location_tag %} selected {% endif %}>{{ user_location_tag }}</option>
-                <option value="{{ user_location_sel_tag }}" {% if applied[x].Filter == user_location_sel_tag %} selected {% endif %}>{{ user_location_sel_tag }}</option>
+                <optgroup label="Preprocessing">
+                  <option value="{{ duplicates_tag }}" {% if applied[x].Filter == duplicates_tag %} selected {% endif %}>{{ duplicates_tag }}</option>
+                  <option value="{{ nsfw_tag }}" {% if applied[x].Filter == nsfw_tag %} selected {% endif %}>{{ nsfw_tag }}</option>
+                  <option value="{{ meme }}" {% if applied[x].Filter == meme %} selected {% endif %}>{{ meme }}</option>
+                </optgroup>
+                <optgroup label="Selection">
+                  <option value="{{ scene_tag }}" {% if applied[x].Filter == scene_tag %} selected {% endif %}>{{ scene_tag }}</option>
+                  <option value="{{ object_tag }}" {% if applied[x].Filter == object_tag %} selected {% endif %}>{{ object_tag }}</option>
+                  <option value="{{ flood_tag }}" {% if applied[x].Filter == flood_tag %} selected {% endif %}>{{ flood_tag }}</option>
+
+                </optgroup>
+                <optgroup label="Location">
+                  <option value="{{ post_location_tag }}" {% if applied[x].Filter == post_location_tag %} selected {% endif %}>{{ post_location_tag }}</option>
+                  <option value="{{ user_location_tag }}" {% if applied[x].Filter == user_location_tag %} selected {% endif %}>{{ user_location_tag }}</option>
+                  <option value="{{ user_location_sel_tag }}" {% if applied[x].Filter == user_location_sel_tag %} selected {% endif %}>{{ user_location_sel_tag }}</option>
+                </optgroup>
 
                 <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>-->
             </select>
@@ -136,24 +153,37 @@
         {% endfor %}
 
         {% endif %}
+        </br>
         <div class= "download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
             <form method= "POST">
             {% if count > x+1 %}
+            <label2><font size="2">{{ tweets[x+1]|length }} items returned</font></label2>&nbsp;&nbsp;&nbsp;
             <a href={{"/downloadCSV?id="~(x+1)}}>
                 <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
             </a>
-            </br></br><label2>{{ tweets[x+1]|length }} items returned</label2>
             {% endif %}
             </form>
         </div></br></br>
         {% endfor %}
         {% endif %}
     </div>
+    </br>
     <div class= "reset">
         <form method="POST">
             <button type="submit" class="reset_button" name="reset_button" style="background-color: Tomato;" value="">Reset Page</button>
         </form>
     </div>
+</div>
+
+<!--footer class="bg-light small px-3 py-3 mt-auto" id="footer"-->
+<footer class="footer2">
+        <div class="container-fluid">
+            <div class="float-right">
+                Here goes the footer
+            </div>
+        </div>
+</footer>
+
     <script>
         for (i=0;i < {{count}};i++) {
             var a = i+1
