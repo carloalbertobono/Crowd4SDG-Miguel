@@ -242,7 +242,7 @@ def index():
                         count+=1
                         alert = ""
                     else:
-                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (1)"
                         
                 elif request.form['Filter_select'] == d['user_location_sel_tag'] :
                     Filter = d['user_location_sel_tag']
@@ -329,12 +329,12 @@ def index():
                         tweets[sel_count]= u 
                         alert = ""
                     else:
-                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (2)"
                 
                 elif request.form['Filter_select'] == d['user_location_sel_tag'] :
                     Filter = d['user_location_sel_tag']
                     attribute = request.form['option3_select']
-                    f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence}
+                    f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
                     applied[sel_count-1] = f                  
                     tmp = StringIO(csv_contents[sel_count-1])
                     df0 = pd.read_csv(tmp)
@@ -376,7 +376,7 @@ def index():
             for a in range(count-sel_count+1):
                 if applied[sel_count-2+a]['Filter'] != d['user_location_sel_tag'] :
                     params = {'filter_name_list': [applied[sel_count-2+a]['Attribute']],
-                              'confidence_threshold_list': [applied[sel_count-2+a]['Confidence']],
+                              'confidence_threshold_list': [int(applied[sel_count-2+a]['Confidence'])/100],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
@@ -397,7 +397,9 @@ def index():
                         alert = ""
                         #pass
                     else:
-                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
+                        print(r.text)
+                        print(applied)
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (3)"
                         break
                 else:
                     tmp = StringIO(csv_contents[sel_count-2+a])
@@ -419,7 +421,7 @@ def index():
                         csv_contents[sel_count-1+a]= csv_string
                         alert = ""
                     else:
-                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter."
+                        alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (4)"
                         break
         else:
             #url_download = int(request.form['download_button'])
