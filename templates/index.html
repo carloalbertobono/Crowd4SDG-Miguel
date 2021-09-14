@@ -21,6 +21,7 @@
         Pipeline Interface 
     </h1>
     </br>
+
     <div class= "source">
         <form method="POST">
             <select id="source" name="source">
@@ -161,6 +162,11 @@
             <a href={{"/downloadCSV?id="~(x+1)}}>
                 <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
             </a>
+                {% if hasmap and count == x+2 %}
+                <a href="/map" target="_blank">
+                    <button id= "mymap" type="button"   name="mymap" value= "0" style= "float: right;">Show on map</button>
+                </a>
+                {% endif %}
             {% endif %}
             </form>
         </div></br></br>

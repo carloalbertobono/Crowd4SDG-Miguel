@@ -8,6 +8,12 @@ from geotext import GeoText
 from config import *
 import uuid as myuuid
 
+# for maps
+import folium
+from folium.plugins import MarkerCluster
+import json
+import numpy as np
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Hola'
 geolocator = Nominatim(user_agent="example app")
@@ -92,7 +98,7 @@ def index():
 
                     f = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 90}
                     applied.append(f)
-                
+                    print(r.text)
                     tmp= StringIO(r.text)
                     df= pd.read_csv(tmp)
                     failsafe(df)
@@ -425,9 +431,12 @@ def index():
     set_session_data(session, count, applied, source_applied, number_images, tweets, csv_contents, confidence,
                       confidence_, alert, locations, uuid, mystuff)
 
+    hasmap, df = checkmap(csv_contents)
+
+    print(applied)
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
-                           number_images=number_images, confidence=confidence)
+                           number_images=number_images, confidence=confidence, hasmap=hasmap)
 
 @app.route("/downloadCSV")
 def downloadCSV():
@@ -438,12 +447,61 @@ def downloadCSV():
     count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
         session)
 
-
     return Response(
         csv_contents[int(request.args.get('id'))],
         mimetype="text/csv",
         headers={"Content-disposition":
                  "attachment; filename=download.csv"})
+
+def checkmap(csv_contents):
+    lastid = len(csv_contents) - 1 # only last id
+    try:
+        df = csv_contents[lastid]
+        tmp = StringIO(df)
+        df = pd.read_csv(tmp)
+    except Exception:
+        return False, None
+
+    if 'CIME_geolocation_centre' in df:
+        return True, df
+
+    return False, None
+
+@app.route('/map', methods=['GET','POST'])
+def map():
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+        session)
+
+    hasmap, df = checkmap(csv_contents)
+    if not hasmap:
+        return "Not initialized"
+
+    # parse json
+    df['CIME_list'] = df['CIME_geolocation_centre'].replace('None', np.nan).fillna('[]').apply(json.loads)
+    # get first
+    df['CIME_first'] = df['CIME_list'].apply(lambda l: [l[0][1], l[0][0]] if l else None)
+    # get valid
+    dfout = df[~df['CIME_first'].isnull()]
+    # to records
+    records = dfout[['full_text', 'media_url', 'CIME_first']].to_dict('records')
+
+    m = folium.Map(location=[0.0, 0.0], tiles="cartodbpositron", zoom_start=2)
+
+    mk = MarkerCluster()
+    fg = folium.FeatureGroup(name='')
+
+    for r in records:
+        ma = folium.Marker(
+            location=r['CIME_first'],
+            popup='<p>' + r['full_text'] + '</p>' + '<img src="' + r['media_url'] + '" height=100>',
+            icon=folium.Icon(color="red", icon="info-sign"),
+        )
+        mk.add_child(ma)
+
+    fg.add_child(mk)
+    m.add_child(fg)
+
+    return m._repr_html_()
 
 if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'

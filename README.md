@@ -11,6 +11,7 @@ In order to run this interface:
    - pip install Flask-Session
    - pip install geopy
    - pip install geotext
+   - pip install folium
 - Type: 
    - export FLASK_APP=app.py
 - Run the flask app by typing:
