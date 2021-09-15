@@ -7,6 +7,7 @@ from geopy.geocoders import Nominatim
 from geotext import GeoText
 from config import *
 import uuid as myuuid
+import shelve
 
 # for maps
 import folium
@@ -92,13 +93,15 @@ def index():
                                   json={'query': keywords,
                                         'count': number_images})
             
-                if len(r.text) != 1:                    
+                if len(r.text) != 1:
+                    print(r.text)
+
                     s = {'ID': count, 'source': option, 'keywords': keywords}
                     source_applied[0]= s
 
                     f = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 90}
                     applied.append(f)
-                    print(r.text)
+
                     tmp= StringIO(r.text)
                     df= pd.read_csv(tmp)
                     failsafe(df)
@@ -190,16 +193,22 @@ def index():
         # After the crawling
         elif 'apply_button' in request.form:
             if int(request.form['apply_button']) == count:
+                extraparams={}
                 if request.form['Filter_select'] != "" and request.form['Filter_select'] != d['user_location_sel_tag'] :
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == d['duplicates_tag']:
                         attribute = "PHashDeduplicator"
+                        extraparams['bits'] = request.form['bit']
                     elif request.form['Filter_select'] == d['meme']:
                         attribute = "MemeDetector"
                     elif request.form['Filter_select'] == d['scene_tag']:
                         attribute = request.form['option1_select']
                     elif request.form['Filter_select'] == d['object_tag']:
-                        attribute = request.form['option2_select']
+                        attribute = 'YOLOv3ObjectDetector'
+                        extraparams['object'] = request.form['option2_select']
+                    elif request.form['Filter_select'] == d['object_tag_detr']:
+                        attribute = 'DETRObjectDetector'
+                        extraparams['object'] = request.form['option_obj_select']
                     elif request.form['Filter_select'] == d['flood_tag']:
                         attribute = "FloodClassifier"
                     elif request.form['Filter_select'] == d["nsfw_tag"]:
@@ -219,10 +228,23 @@ def index():
                               'column_name': 'media_url',
                               'csv_file': csv_contents[count-1]
                               }
+
+                    # build filters
+                    filter = {attribute: {'confidence': confidence}}
+                    for k,v in extraparams.items():
+                        filter[attribute][k] = v
+                    params = {'filters': filter,
+                              'column_name': 'media_url',
+                              'csv_file': csv_contents[count - 1]
+                              }
+
+                    print("###", params['filters'])
                     r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
+                    print("###", r.text)
                     
                     if len(r.text) > 160:
                         f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
+                        f = {**extraparams, **f}
                         k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 90}
                         applied[count-1] = f
                         applied.append(k)
@@ -272,18 +294,27 @@ def index():
                 #else:
                 #    flash('Select an option')
                 #    applied[count-1]['Filter'] = ""
+            # not last request
             else:
                 sel_count = int(request.form['apply_button'])
+
+                extraparams = {}
+
                 if request.form['Filter_select'] != "" and request.form['Filter_select'] != d['user_location_sel_tag'] :
                     Filter = request.form['Filter_select']
                     if request.form['Filter_select'] == d['duplicates_tag']:
                         attribute = "PHashDeduplicator"
+                        extraparams['bits'] = request.form['bit']
                     elif request.form['Filter_select'] == d['meme']:
                         attribute = "MemeDetector"
                     elif request.form['Filter_select'] == d['scene_tag']:
                         attribute = request.form['option1_select']
                     elif request.form['Filter_select'] == d['object_tag']:
-                        attribute = request.form['option2_select']
+                        attribute = 'YOLOv3ObjectDetector'
+                        extraparams['object'] = request.form['option2_select']
+                    elif request.form['Filter_select'] == d['object_tag_detr']:
+                        attribute = 'DETRObjectDetector'
+                        extraparams['object'] = request.form['option_obj_select']
                     elif request.form['Filter_select'] == d['flood_tag']:
                         attribute = "FloodClassifier"
                     elif request.form['Filter_select'] == d["nsfw_tag"]:
@@ -305,12 +336,23 @@ def index():
                               'confidence_threshold_list': [confidence],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-1]
-                              }                        
+                              }
+
+                    filter = {attribute: {'confidence': confidence}}
+                    for k,v in extraparams.items():
+                        filter[attribute][k] = v
+                    params = {'filters': filter,
+                              'column_name': 'media_url',
+                              'csv_file': csv_contents[sel_count - 1]
+                              }
+
+                    print("###", params['filters'])
                     
                     r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
                     #print(len(r.text))
                     if len(r.text) > 160:
                         f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
+                        f = {**extraparams, **f}
                         applied[sel_count-1] = f
                         csv_contents[sel_count] = r.text                    
                         #url_csv_get = requests.get(url_csv)
@@ -380,8 +422,13 @@ def index():
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
+                    params = {'filters': {applied[sel_count-2+a]['Attribute']: {'confidence': int(applied[sel_count-2+a]['Confidence'])/100}},
+                              'column_name': 'media_url',
+                              'csv_file': csv_contents[sel_count-2+a]
+                              }
                     r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
                     if len(r.text) > 160:
+                        print(r.text)
                         csv_contents[sel_count-1+a] = r.text
                         tmp= StringIO(r.text)
                         df= pd.read_csv(tmp)
@@ -398,7 +445,6 @@ def index():
                         #pass
                     else:
                         print(r.text)
-                        print(applied)
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (3)"
                         break
                 else:
@@ -434,11 +480,11 @@ def index():
                       confidence_, alert, locations, uuid, mystuff)
 
     hasmap, df = checkmap(csv_contents)
+    mapdata = map(small=True) if hasmap else None
 
-    print(applied)
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
-                           number_images=number_images, confidence=confidence, hasmap=hasmap)
+                           number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata)
 
 @app.route("/downloadCSV")
 def downloadCSV():
@@ -470,7 +516,7 @@ def checkmap(csv_contents):
     return False, None
 
 @app.route('/map', methods=['GET','POST'])
-def map():
+def map(small=False):
     count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
         session)
 
@@ -487,7 +533,13 @@ def map():
     # to records
     records = dfout[['full_text', 'media_url', 'CIME_first']].to_dict('records')
 
-    m = folium.Map(location=[0.0, 0.0], tiles="cartodbpositron", zoom_start=2)
+    if small:
+        f = folium.Figure(width='60%')
+        m = folium.Map(location=[10.0, 0.0], tiles="cartodbpositron" , zoom_start=2)
+        m.add_to(f)
+        # m = folium.Map(location=[10.0, 0.0], tiles="cartodbpositron", zoom_start=1, height='30%', width='40%', left ='30%', right='30%', padding='0%')
+    else:
+        m = folium.Map(location=[10.0, 0.0], tiles="cartodbpositron", zoom_start=3)
 
     mk = MarkerCluster()
     fg = folium.FeatureGroup(name='')
@@ -503,7 +555,11 @@ def map():
     fg.add_child(mk)
     m.add_child(fg)
 
-    return m._repr_html_()
+    if small:
+        h = f._repr_html_()
+    else:
+        h = m._repr_html_()
+    return h
 
 if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
