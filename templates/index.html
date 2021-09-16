@@ -10,13 +10,13 @@
 
     <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center;">
         <div>
-          <img src="/static/images/Crowd4SDG.png" style="height: 75px;flex-basis: 15%;">
+          <img src="/static/images/Crowd4SDG.png" style="height: 75px;flex-basis: 10%;">
         </div>
-        <div style="flex-basis: 55%;">
+        <div style="flex-basis: 50%;">
           &nbsp;
         </div>
         <div>
-          <img src="/static/images/Logo_polimi.png" style="height: 45px;flex-basis: 25%;">
+          <img src="/static/images/Logo_polimi.png" style="height: 45px;flex-basis: 20%;">
         </div>
     </div>
     <h1 class= "logo">
@@ -110,7 +110,11 @@
             {% endif %}
             {% endfor %}
             <select id={{"option1"~(x+1)}} name="option1_select" {% if applied[x].Filter == scene_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <option value="PublicPrivateClassifier" {% if applied[x].Attribute == "PublicPrivateClassifier" %} selected {% endif %}>Outdoors</option>
+                <!--option value="PublicPrivateClassifier" {% if applied[x].Attribute == "PublicPrivateClassifier" %} selected {% endif %}>Outdoors</option--!>
+                {% for obj in moreparams.get('places365') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                {% endfor %}
+
                 <!--
                 <option value="Indoors" {% if applied[x].Attribute == "Indoors" %} selected {% endif %}>Indoors</option>
                 <option value="Sea" {% if applied[x].Attribute == "Sea" %} selected {% endif %}>Sea</option>
@@ -120,11 +124,17 @@
             </select>
 
             <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == object_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                {% for obj in moreparams.get('coco') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                {% endfor %}
+
                 <!--option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %} selected {% endif %}>Person</option--!>
-                <option value="person" {% if applied[x].object == "person" %} selected {% endif %}>person</option>
-                <option value="car" {% if applied[x].object == "car" %} selected {% endif %}>car</option>
-                <option value="traffic light" {% if applied[x].object == "traffic light" %} selected {% endif %}>traffic light</option>
-                <option value="cell phone" {% if applied[x].object == "cell phone" %} selected {% endif %}>cell phone</option>
+
+                <!--option value="person" {% if applied[x].object == "person" %} selected {% endif %}>person</option--!>
+                <!--option value="car" {% if applied[x].object == "car" %} selected {% endif %}>car</option--!>
+                <!--option value="traffic light" {% if applied[x].object == "traffic light" %} selected {% endif %}>traffic light</option--!>
+                <!--option value="cell phone" {% if applied[x].object == "cell phone" %} selected {% endif %}>cell phone</option--!>
+
                 <!--
                 <option value="Rubble" {% if applied[x].Attribute == "Rubble" %} selected {% endif %}>Rubble</option>
                 <option value="House" {% if applied[x].Attribute == "House" %} selected {% endif %}>House</option>
@@ -137,10 +147,9 @@
             </select>
             <select id={{"option_obj_select"~(x+1)}} name="option_obj_select" {% if applied[x].Filter == object_tag_detr %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
                 <!--option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %} selected {% endif %}>Person</option--!>
-                <option value="person" {% if applied[x].object == "person" %} selected {% endif %}>person</option>
-                <option value="car" {% if applied[x].object == "car" %} selected {% endif %}>car</option>
-                <option value="traffic light" {% if applied[x].object == "traffic light" %} selected {% endif %}>traffic light</option>
-                <option value="cell phone" {% if applied[x].object == "cell phone" %} selected {% endif %}>cell phone</option>
+                {% for obj in moreparams.get('coco') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                {% endfor %}
 
                 <!--
                 <option value="Rubble" {% if applied[x].Attribute == "Rubble" %} selected {% endif %}>Rubble</option>
