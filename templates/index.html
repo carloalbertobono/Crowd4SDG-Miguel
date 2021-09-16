@@ -3,13 +3,16 @@
 {% block title %}Crows4SDG VisualCit Pipeline Interface{% endblock %}
 
 {% block content %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
 <div class="content">
 
     <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center;">
         <div>
-          <img src="/static/images/Crowd4SDG.png" style="height: 45px;flex-basis: 25%;">
+          <img src="/static/images/Crowd4SDG.png" style="height: 75px;flex-basis: 15%;">
         </div>
-        <div style="flex-basis: 7%;">
+        <div style="flex-basis: 55%;">
           &nbsp;
         </div>
         <div>
@@ -21,6 +24,11 @@
         Pipeline Interface 
     </h1>
     <br style="line-height: 5px" />
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
 
     <div class= "source">
         <form method="POST">
@@ -72,7 +80,7 @@
     <div class="filters">
         {% if count>0 %}
         {% for x in range(count) %}
-        <form method="POST">
+        <form method="POST" id={{"poster"~(x+1)}}>
             <button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
             <select id={{"Filter"~(x+1)}} name="Filter_select" required>
                 <option value="">-Select-</option>
@@ -155,10 +163,20 @@
             <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="int" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <label id={{"label_bit"~(x+1)}} for={{"bit"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Similarity threshold (lower values mean less sensitive):</label>
             <input id={{"bit"~(x+1)}} name="bit" value={% if applied[x].bits is defined %}{{ applied[x].bits }}{% else %}8{% endif %} type="int" min="0" max="10" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
-            <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}}>Apply</button>
+            <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}} nom={{ tweets[x]|length }}>Apply</button>
             <button id={{"loading"~(x+1)}} name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button>
+            <div class="disabledBackgroundContainer" id="disabledBackgroundContainer{{(x+1)}}">
+                <progress id="progressBar{{x+1}}"></progress>
+            </div> <!-- {{x+1}}, {{ tweets[x]|length }}  -->
+
+
             <br style="line-height: 5px" /><br style="line-height: 5px" />
         </form>
+
+
+
+
+
         {% if applied[x].Filter != "" %}
         {% for s in source_applied %}
         {% if tweets[x+1]|length < number %}
@@ -331,10 +349,13 @@
             
             apply_button.onclick = function() {
                 Filter = Filter_select.value;
+
                 if(Filter != '') {
                     apply_button.style.display='none';
                     loading_symbol.style.display='inline';
                 }
+
+                serverCall(a);
             }
             window.onload = function() {
                 apply_button.style.display='inline';
@@ -381,17 +402,59 @@
             });
     </script>
     <script>
+
     for (i=0;i < {{count}};i++) {
         var a = i+1
-        let apply_button = document.getElementById('apply_button'+a);
-        var input = document.getElementById("myInput");
-        input.addEventListener("keyup", function(event) {
-            if (event.keyCode === 13) {
+        var input1 = document.getElementById('confidence'+a);
+        var input2 = document.getElementById('bit'+a);
+        var apply_button = document.getElementById('up_button'+a);
+        let Filter_select = document.getElementById('Filter'+a);
+        var myform = document.getElementById('poster'+a);
+
+        input1.addEventListener("keypress", function(event) {
+            if (event.keyCode === 13 || event.which === 13 || event.code === 'Enter') {
                 event.preventDefault();
-                document.getElementById("myBtn").click();
+                Filter = Filter_select.value;
+                myform.submit();
             }
         });
+
+        input2.addEventListener("keypress", function(event) {
+            if (event.keyCode === 13 || event.which === 13 || event.code === 'Enter') {
+                event.preventDefault();
+                Filter = Filter_select.value;
+                myform.submit();
+            }
+        }
+        );
     }
 
+    </script>
+    <script>
+        function serverCall(id) {
+
+        console.log(id)
+        var container = document.getElementById('disabledBackgroundContainer'+a),
+        progressBar = document.getElementById('progressBar'+a),
+        applyButton = document.getElementById('apply_button'+a)
+        duration = applyButton.getAttribute("nom") * 1000,
+        console.log(duration)
+        currentProgess = 0,
+        steps = 10;
+
+        progressBar.setAttribute("max", duration);
+
+        $(container).css("display", "inline");
+
+        var timer = setInterval(function () {
+            currentProgess += steps;
+            progressBar.setAttribute('value', currentProgess);
+
+            if (currentProgess >= duration) {
+                clearInterval(timer);
+                // $(container).css("display", "none");
+            }
+        }, steps);
+    }
     </script>
 {% endblock %}

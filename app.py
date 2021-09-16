@@ -534,7 +534,7 @@ def map(small=False):
     records = dfout[['full_text', 'media_url', 'CIME_first']].to_dict('records')
 
     if small:
-        f = folium.Figure(width='60%')
+        f = folium.Figure(width='50%')
         m = folium.Map(location=[10.0, 0.0], tiles="cartodbpositron" , zoom_start=2)
         m.add_to(f)
         # m = folium.Map(location=[10.0, 0.0], tiles="cartodbpositron", zoom_start=1, height='30%', width='40%', left ='30%', right='30%', padding='0%')
@@ -557,6 +557,7 @@ def map(small=False):
 
     if small:
         h = f._repr_html_()
+        h = h.replace("position:relative;width:100%;height:0;padding-bottom:60%;", "position:relative;width:100%;height:0;padding-bottom:60vh;")
     else:
         h = m._repr_html_()
     return h
