@@ -148,7 +148,7 @@ def index():
 
 
                 else:
-                    alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional"
+                    alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional. Also refer to the <a href=\"https://developer.twitter.com/en/docs/twitter-api/v1/rules-and-filtering/search-operators\">Twitter user guide</a>"
 
             else:
                 option = request.form['source']
