@@ -38,7 +38,7 @@
             </select>
             <input id="keywords" name="keywords" type="text" {% if count > 0 %} value= '{{source_applied[0].keywords}}' {% endif %} placeholder= "Search keywords" required>
             <label for="number_pic" style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif;">Number of images:</label>
-            <input id="number_pic" name="number_pic" {% if count == 0%} value= 100 {% else %} value= {{number_images}} {% endif %} type="number" min="100" step="100" style="width: 50px;">
+            <input id="number_pic" name="number_pic" {% if count == 0%} value= 100 {% else %} value= {{number_images}} {% endif %} type="number" min="100" max="1000" step="100" style="width: 50px;">
             <button id="source_button" type="submit" class="source_button" name="source_button" value="">Search</button> 
             <button id="loading" name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button> <br style="line-height: 5px" /><br style="line-height: 5px" />
         </form>
@@ -167,7 +167,7 @@
             <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
             <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold (%):</label>
-            <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="int" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
+            <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="number" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <label id={{"label_bit"~(x+1)}} for={{"bit"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Similarity threshold (lower values mean less sensitive):</label>
             <input id={{"bit"~(x+1)}} name="bit" value={% if applied[x].bits is defined %}{{ applied[x].bits }}{% else %}8{% endif %} type="int" min="0" max="10" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}} nom={{ tweets[x]|length }}>Apply</button>
@@ -328,10 +328,11 @@
         let search_button = document.getElementById('source_button');
         let loading_symbol = document.getElementById('loading');
         let keywords_text = document.getElementById('keywords');
+        let number_pic = document.getElementById('number_pic');
         
         search_button.onclick = function() {
             keywords = keywords_text.value;
-            if(keywords != '') {
+            if(keywords != '' && number_pic.value < 1001) {
                 search_button.style.display='none';
                 loading_symbol.style.display='inline';
             }            
