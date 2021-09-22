@@ -244,7 +244,14 @@
         <form method="POST">
             <button type="submit" class="reset_button" name="reset_button" style="background-color: Tomato;" value="">Reset Page</button>
         </form>
+        {% if count > 0 %}
+        <br style="line-height: 5px" />
+         <a href="/batch" target="_blank">
+            <button id= "batch" type="button" name="batch" value="0" >Get configuration for this pipeline</button>
+        </a>
+        {% endif %}
     </div>
+
 </div>
 
 <!--footer class="bg-light small px-3 py-3 mt-auto" id="footer"-->

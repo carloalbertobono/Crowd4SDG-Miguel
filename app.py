@@ -19,6 +19,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Hola'
 geolocator = Nominatim(user_agent="example app")
 
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
 
@@ -242,10 +244,10 @@ def index():
                               }
 
                     # build filters
-                    filter = {attribute: {'confidence': confidence}}
+                    filter_params = {'confidence': confidence}
                     for k,v in extraparams.items():
-                        filter[attribute][k] = v
-                    params = {'filters': filter,
+                        filter_params[k] = v
+                    params = {'filters': [{attribute: filter_params}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[count - 1]
                               }
@@ -340,20 +342,12 @@ def index():
                     
                     confidence_ = request.form['confidence'] # form value
                     confidence = float(confidence_)/100 # post value
-                    #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
-                    #url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
 
-                    params = {'filter_name_list': [attribute],
-                              #'confidence_threshold_list': [float(attribute.split()[1])],
-                              'confidence_threshold_list': [confidence],
-                              'column_name': 'media_url',
-                              'csv_file': csv_contents[sel_count-1]
-                              }
-
-                    filter = {attribute: {'confidence': confidence}}
-                    for k,v in extraparams.items():
-                        filter[attribute][k] = v
-                    params = {'filters': filter,
+                    # build filters
+                    filter_params = {'confidence': confidence}
+                    for k, v in extraparams.items():
+                        filter_params[k] = v
+                    params = {'filters': [{attribute: filter_params}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count - 1]
                               }
@@ -434,7 +428,7 @@ def index():
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
-                    params = {'filters': {applied[sel_count-2+a]['Attribute']: {'confidence': int(applied[sel_count-2+a]['Confidence'])/100}},
+                    params = {'filters': [{applied[sel_count-2+a]['Attribute']: {'confidence': int(applied[sel_count-2+a]['Confidence'])/100}}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
@@ -573,6 +567,37 @@ def map(small=False):
     else:
         h = m._repr_html_()
     return h
+
+from flask import jsonify
+import copy
+@app.route('/batch', methods=['GET','POST'])
+def batch():
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+        session)
+
+    j = {'url': f'http://{address}/Crawler/API/CrawlAndFilter',
+         'count': '...',
+         'csv_file': '...',
+         'column_name': 'media_url',
+         'source': source_applied[0]['source'],
+         'query': source_applied[0]['keywords'],
+         'filters': []}
+
+    filters = applied[:-1]
+    for f in filters:
+        f = copy.deepcopy(f)
+        key = f['Attribute']
+        config = f
+        del config['Attribute']
+        del config['ID']
+        config['confidence'] = config['Confidence']
+        del config['Confidence']
+        del config['Filter']
+
+        j['filters'].append({key :  config})
+
+    return jsonify(j)
+
 
 if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
