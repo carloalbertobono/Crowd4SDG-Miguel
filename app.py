@@ -78,6 +78,9 @@ def index():
 
     # Init all variables at user session level (not globals)
     count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(session)
+    
+    print(applied)
+    print(source_applied)
 
     print("GOT REQUEST FROM", uuid)
 
@@ -94,7 +97,6 @@ def index():
                                         'count': number_images})
             
                 if len(r.text) != 1:
-                    print(r.text)
 
                     s = {'ID': count, 'source': option, 'keywords': keywords}
                     source_applied[0]= s
@@ -240,7 +242,6 @@ def index():
 
                     print("###", params['filters'])
                     r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
-                    print("###", r.text)
                     
                     if len(r.text) > 160:
                         f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
@@ -428,7 +429,7 @@ def index():
                               }
                     r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
                     if len(r.text) > 160:
-                        print(r.text)
+
                         csv_contents[sel_count-1+a] = r.text
                         tmp= StringIO(r.text)
                         df= pd.read_csv(tmp)
