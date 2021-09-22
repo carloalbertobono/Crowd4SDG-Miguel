@@ -15,7 +15,7 @@ In order to run this interface:
 - Type: 
    - export FLASK_APP=app.py
 - Run the flask app by typing:
-   - flask run -host 0.0.0.0 --port 2000
+   - flask run --host 0.0.0.0 --port 2000
 
 
 In order to use this interface:
