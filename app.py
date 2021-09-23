@@ -574,7 +574,7 @@ from flask import jsonify
 import copy
 @app.route('/batch', methods=['GET','POST'])
 def batch():
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     j = {'url': f'http://{address}/Crawler/API/CrawlAndFilter',
