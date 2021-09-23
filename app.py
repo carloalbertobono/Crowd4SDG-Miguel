@@ -500,7 +500,7 @@ def downloadCSV():
     #print("int(request.args.get('id')): ", int(request.args.get('id')))
     #print("csv_contents:\n\n", csv_contents)
 
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     return Response(
@@ -525,7 +525,7 @@ def checkmap(csv_contents):
 
 @app.route('/map', methods=['GET','POST'])
 def map(small=False):
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     hasmap, df = checkmap(csv_contents)
