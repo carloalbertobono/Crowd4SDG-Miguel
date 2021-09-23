@@ -48,10 +48,12 @@ def get_or_setandget(mydict, key, default):
 
 # Session - level variables
 def get_session_data(session):
-    # recover identifier from cookie
-    uuid = get_or_setandget(session, 'uiid', myuuid.uuid1()).hex
+    # recover identifier from
+    firsttime=False
+    uuid = get_or_setandget(session, 'uuid', myuuid.uuid1()).hex
 
     if uuid not in user_data:
+        firsttime = True
         user_data[uuid] = {}
     mystuff = user_data[uuid]
 
@@ -66,7 +68,7 @@ def get_session_data(session):
     get_or_setandget(mystuff, 'confidence_', 0.9),
     get_or_setandget(mystuff, 'alert', ""),
     get_or_setandget(mystuff, 'locations', []),
-    uuid, mystuff)
+    uuid, firsttime, mystuff)
 
 def set_session_data(session, count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff):
     mystuff['count'] = count
@@ -88,7 +90,7 @@ def index():
     global moreparams
 
     # Init all variables at user session level (not globals)
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(session)
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(session)
     
     print(applied)
     print(source_applied)
@@ -490,7 +492,7 @@ def index():
 
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
-                           number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata, moreparams=moreparams)
+                           number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata, moreparams=moreparams, firsttime=firsttime)
 
 @app.route("/downloadCSV")
 def downloadCSV():

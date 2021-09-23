@@ -2,7 +2,7 @@
 In order to run this interface:
 
 - Create a nice virtual environment 
-   - virtualenv VIRTUAL
+   - virtualenv -p python3 VIRTUAL
    - source VIRTUAL/bin/activate
 
 - Install these two required packages (this step needs only to be done once):
