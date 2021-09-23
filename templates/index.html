@@ -261,7 +261,7 @@
   <!-- Modal content -->
   <div class="modal-content">
     <span id="close2_" class="close">&times;</span>
-       <video controls autoplay loop muted playsinline id="myvideo" src="{% if firsttime %}/static/video/visualcit_demo_sound.mkv{% else %}none{% endif %}" controls="yourControls" autoplay="false">
+       <video controls playsinline id="myvideo" src="{% if firsttime %}/static/video/visualcit_demo_sound.mkv{% else %}none{% endif %}" controls="yourControls" autoplay="false">
         Your browser doesn't support the `<video>` tag. /*this is a fallback*/
         </video>
   </div>
