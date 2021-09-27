@@ -613,7 +613,7 @@ def batch():
 
     return jsonify(j)
 
-def track_event(cid, type = 'event', category = 'test_', action = 'test_', label = 'test_', value=1):
+def track_event(cid, type = 'event', category = 'test', action = 'test', label = 'test', value=1):
     data = {
         'v': '1',  # API Version.
         'tid': GA_TRACKING_ID,  # Tracking ID / Property ID.
@@ -628,10 +628,12 @@ def track_event(cid, type = 'event', category = 'test_', action = 'test_', label
         'ua': 'Crowd4SDG Visualcit Backend'
     }
 
-    response = requests.post(
-        'https://www.google-analytics.com/debug/collect', data=data)
+    print(data)
 
-    print(response.status_code)
+    response = requests.post(
+        'https://www.google-analytics.com/collect', data=data)
+
+    print(response.text)
 
 
 if __name__ == '__main__':
