@@ -21,7 +21,7 @@ geolocator = Nominatim(user_agent="example app")
 
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
-GA_TRACKING_ID = "G-PBVWH56SV2"
+GA_TRACKING_ID = "UA-208620802-1"
 
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
@@ -614,14 +614,14 @@ def batch():
     return jsonify(j)
 
 
-def track_event(cid, category = 'test', action = 'test', label = 'test', value=0):
+def track_event(cid, type = 'event', category = 'test', action = 'test', label = 'test', value=0):
     data = {
         'v': '1',  # API Version.
         'tid': GA_TRACKING_ID,  # Tracking ID / Property ID.
         # Anonymous Client Identifier. Ideally, this should be a UUID that
         # is associated with particular user, device, or browser instance.
         'cid': cid,
-        't':  'test flask backend event',  # Event hit type.
+        't':  type,  # Event hit type.
         'ec': category,  # Event category.
         'ea': action,  # Event action.
         'el': label,  # Event label.
@@ -630,14 +630,7 @@ def track_event(cid, category = 'test', action = 'test', label = 'test', value=0
     }
 
     response = requests.post(
-        'https://www.google-analytics.com/collect', data=data)
-
-    print(response.text)
-
-    # If the request fails, this will raise a RequestException. Depending
-    # on your application's needs, this may be a non-error and can be caught
-    # by the caller.
-    response.raise_for_status()
+        'https://www.google-analytics.com/debug/collect', data=data)
 
 
 if __name__ == '__main__':
