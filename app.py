@@ -21,6 +21,8 @@ geolocator = Nominatim(user_agent="example app")
 
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
+GA_TRACKING_ID = "G-PBVWH56SV2"
+
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
 
@@ -89,13 +91,17 @@ def index():
 
     global moreparams
 
+    ga = None
+    if '_ga' in request.cookies:
+        ga = request.cookies.get("_ga")
+
     # Init all variables at user session level (not globals)
     count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(session)
     
     print(applied)
     print(source_applied)
 
-    print("GOT REQUEST FROM", uuid)
+    print("GOT REQUEST FROM", uuid, "GA:", ga)
 
     if request.method == "POST":
         # Before the crawling
@@ -490,6 +496,13 @@ def index():
     hasmap, df = checkmap(csv_contents)
     mapdata = map(small=True) if hasmap else None
 
+    # Tracking
+    if ga:
+        print("TRACKING")
+        track_event(ga)
+    else:
+        print("NOT TRACKING")
+
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
                            number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata, moreparams=moreparams, firsttime=firsttime)
@@ -599,6 +612,32 @@ def batch():
         j['filters'].append({key :  config})
 
     return jsonify(j)
+
+
+def track_event(cid, category = 'test', action = 'test', label = 'test', value=0):
+    data = {
+        'v': '1',  # API Version.
+        'tid': GA_TRACKING_ID,  # Tracking ID / Property ID.
+        # Anonymous Client Identifier. Ideally, this should be a UUID that
+        # is associated with particular user, device, or browser instance.
+        'cid': cid,
+        't':  'test flask backend event',  # Event hit type.
+        'ec': category,  # Event category.
+        'ea': action,  # Event action.
+        'el': label,  # Event label.
+        'ev': value,  # Event value, must be an integer
+        'ua': 'Crowd4SDG Visualcit Backend'
+    }
+
+    response = requests.post(
+        'https://www.google-analytics.com/collect', data=data)
+
+    print(response.text)
+
+    # If the request fails, this will raise a RequestException. Depending
+    # on your application's needs, this may be a non-error and can be caught
+    # by the caller.
+    response.raise_for_status()
 
 
 if __name__ == '__main__':

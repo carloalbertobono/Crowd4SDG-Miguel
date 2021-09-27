@@ -205,14 +205,23 @@ video {
 
     </style>
 
+
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PBVWH56SV2"></script>
+<script src="https://www.googletagmanager.com/gtag/js?id=G-PBVWH56SV2">
+
+</script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-PBVWH56SV2');
+
+  var clientId = 123;
+
+  gtag('get', 'G-PBVWH56SV2', 'client_id', (client_id) => {
+    clientId = client_id;
+  })
+
 </script>
 
 </head>
