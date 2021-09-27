@@ -354,16 +354,18 @@
             let up_button = document.getElementById('up_button'+a);
             let loading_symbol = document.getElementById('loading'+a);
             let Filter_select = document.getElementById('Filter'+a);
+            let confidence = document.getElementById('confidence'+a);
             
             apply_button.onclick = function() {
                 Filter = Filter_select.value;
 
-                if(Filter != '') {
+                if(Filter != '' && confidence.value < 101) {
                     apply_button.style.display='none';
                     loading_symbol.style.display='inline';
+                    serverCall(a);
                 }
 
-                serverCall(a);
+
             }
             window.onload = function() {
                 apply_button.style.display='inline';
@@ -375,30 +377,7 @@
         }           
         
     </script>
-    <script>
-        for (i=0; i < {{count}};i++) {
-            var a = i+1
-            let apply_button = document.getElementById('apply_button'+a);
-            let up_button = document.getElementById('up_button'+a);
-            let loading_symbol = document.getElementById('loading'+a);
-            let Filter_select = document.getElementById('Filter'+a);
 
-            up_button.onclick = function() {
-                Filter = Filter_select.value;
-                if(Filter != '') {
-                    apply_button.style.display='none';
-                    loading_symbol.style.display='inline';
-                }            
-            }            
-            window.onload = function() {
-                apply_button.style.display='inline';
-                loading_symbol.style.display='none';
-                if ('{{alert}}' != '') {
-                    alert('{{alert}}');
-                }            
-            }                        
-        }
-    </script> 
     <script>
             $(window).scroll(function () {
             sessionStorage.scrollTop = $(this).scrollTop();
