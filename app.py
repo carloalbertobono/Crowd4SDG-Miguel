@@ -19,6 +19,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Hola'
 geolocator = Nominatim(user_agent="example app")
 
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
 
@@ -46,10 +48,12 @@ def get_or_setandget(mydict, key, default):
 
 # Session - level variables
 def get_session_data(session):
-    # recover identifier from cookie
-    uuid = get_or_setandget(session, 'uiid', myuuid.uuid1()).hex
+    # recover identifier from
+    firsttime=False
+    uuid = get_or_setandget(session, 'uuid', myuuid.uuid1()).hex
 
     if uuid not in user_data:
+        firsttime = True
         user_data[uuid] = {}
     mystuff = user_data[uuid]
 
@@ -64,7 +68,7 @@ def get_session_data(session):
     get_or_setandget(mystuff, 'confidence_', 0.9),
     get_or_setandget(mystuff, 'alert', ""),
     get_or_setandget(mystuff, 'locations', []),
-    uuid, mystuff)
+    uuid, firsttime, mystuff)
 
 def set_session_data(session, count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff):
     mystuff['count'] = count
@@ -86,7 +90,10 @@ def index():
     global moreparams
 
     # Init all variables at user session level (not globals)
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(session)
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(session)
+    
+    print(applied)
+    print(source_applied)
 
     print("GOT REQUEST FROM", uuid)
 
@@ -103,7 +110,6 @@ def index():
                                         'count': number_images})
             
                 if len(r.text) != 1:
-                    print(r.text)
 
                     s = {'ID': count, 'source': option, 'keywords': keywords}
                     source_applied[0]= s
@@ -240,17 +246,16 @@ def index():
                               }
 
                     # build filters
-                    filter = {attribute: {'confidence': confidence}}
+                    filter_params = {'confidence': confidence}
                     for k,v in extraparams.items():
-                        filter[attribute][k] = v
-                    params = {'filters': filter,
+                        filter_params[k] = v
+                    params = {'filters': [{attribute: filter_params}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[count - 1]
                               }
 
                     print("###", params['filters'])
                     r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
-                    print("###", r.text)
                     
                     if len(r.text) > 160:
                         f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
@@ -339,20 +344,12 @@ def index():
                     
                     confidence_ = request.form['confidence'] # form value
                     confidence = float(confidence_)/100 # post value
-                    #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
-                    #url_csv = r"http://131.175.120.2:7777/Filter/API/filterImageURL?filter_name_list=PeopleDetector&filter_name_list=MemeDetector&filter_name_list=PublicPrivateClassifier&confidence_threshold_list=0.98&confidence_threshold_list=0.89&confidence_threshold_list=0.93&column_name=media_url&csv_url=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D12hy5NRkFiNG2lI9t6oXQ_12_QDUQz94c"
 
-                    params = {'filter_name_list': [attribute],
-                              #'confidence_threshold_list': [float(attribute.split()[1])],
-                              'confidence_threshold_list': [confidence],
-                              'column_name': 'media_url',
-                              'csv_file': csv_contents[sel_count-1]
-                              }
-
-                    filter = {attribute: {'confidence': confidence}}
-                    for k,v in extraparams.items():
-                        filter[attribute][k] = v
-                    params = {'filters': filter,
+                    # build filters
+                    filter_params = {'confidence': confidence}
+                    for k, v in extraparams.items():
+                        filter_params[k] = v
+                    params = {'filters': [{attribute: filter_params}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count - 1]
                               }
@@ -433,13 +430,13 @@ def index():
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
-                    params = {'filters': {applied[sel_count-2+a]['Attribute']: {'confidence': int(applied[sel_count-2+a]['Confidence'])/100}},
+                    params = {'filters': [{applied[sel_count-2+a]['Attribute']: {'confidence': int(applied[sel_count-2+a]['Confidence'])/100}}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
                     r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
                     if len(r.text) > 160:
-                        print(r.text)
+
                         csv_contents[sel_count-1+a] = r.text
                         tmp= StringIO(r.text)
                         df= pd.read_csv(tmp)
@@ -495,7 +492,7 @@ def index():
 
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
-                           number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata, moreparams=moreparams)
+                           number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata, moreparams=moreparams, firsttime=firsttime)
 
 @app.route("/downloadCSV")
 def downloadCSV():
@@ -503,7 +500,7 @@ def downloadCSV():
     #print("int(request.args.get('id')): ", int(request.args.get('id')))
     #print("csv_contents:\n\n", csv_contents)
 
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     return Response(
@@ -528,7 +525,7 @@ def checkmap(csv_contents):
 
 @app.route('/map', methods=['GET','POST'])
 def map(small=False):
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     hasmap, df = checkmap(csv_contents)
@@ -572,6 +569,37 @@ def map(small=False):
     else:
         h = m._repr_html_()
     return h
+
+from flask import jsonify
+import copy
+@app.route('/batch', methods=['GET','POST'])
+def batch():
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
+        session)
+
+    j = {'url': f'http://{address}/Crawler/API/CrawlAndFilter',
+         'count': '...',
+         'csv_file': '...',
+         'column_name': 'media_url',
+         'source': source_applied[0]['source'],
+         'query': source_applied[0]['keywords'],
+         'filters': []}
+
+    filters = applied[:-1]
+    for f in filters:
+        f = copy.deepcopy(f)
+        key = f['Attribute']
+        config = f
+        del config['Attribute']
+        del config['ID']
+        config['confidence'] = config['Confidence']
+        del config['Confidence']
+        del config['Filter']
+
+        j['filters'].append({key :  config})
+
+    return jsonify(j)
+
 
 if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'

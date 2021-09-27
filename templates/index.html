@@ -244,8 +244,61 @@
         <form method="POST">
             <button type="submit" class="reset_button" name="reset_button" style="background-color: Tomato;" value="">Reset Page</button>
         </form>
+        {% if count > 0 %}
+        <br style="line-height: 5px" />
+         <a href="/batch" target="_blank">
+            <button id= "batch" type="button" name="batch" value="0" >Get configuration for this pipeline</button>
+        </a>
+        {% endif %}
     </div>
+
 </div>
+
+
+<!-- The Modal -->
+<div id="myModal" class="modal", style="display:{% if firsttime %}block{% else %}none{% endif %};">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id="close2_" class="close">&times;</span>
+       <video controls playsinline id="myvideo" src="{% if firsttime %}/static/video/visualcit_demo_sound.mkv{% else %}none{% endif %}" controls="yourControls" autoplay="false">
+        Your browser doesn't support the `<video>` tag. /*this is a fallback*/
+        </video>
+  </div>
+
+</div>
+
+<!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
+
+<script>
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the <span> element that closes the modal
+var span = document.getElementById("close2_");
+
+var video = document.getElementById("myvideo");
+video.pause();
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+  video.pause();
+  video.currentTime = 0;
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+    video.pause();
+    video.currentTime = 0;
+  }
+}
+
+</script>
+
+
 
 <!--footer class="bg-light small px-3 py-3 mt-auto" id="footer"-->
 <footer class="footer2">
