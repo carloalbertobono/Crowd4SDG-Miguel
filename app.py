@@ -113,7 +113,8 @@ def index():
             
                 r = requests.post('http://'+address+'/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
-                                        'count': number_images})
+                                        'count': number_images,
+                                        'preload_images': True})
             
                 if len(r.text) != 1:
 
@@ -170,7 +171,8 @@ def index():
                 #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"                
                 r = requests.post('http://'+address+'/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
-                                        'count': number_images})
+                                        'count': number_images,
+                                        'preload_images': True})
                 if len(r.text) != 1:                    
                     s = {'ID': 0, 'source': option, 'keywords': keywords}
                     source_applied[0]= s
@@ -238,6 +240,8 @@ def index():
                     elif request.form['Filter_select'] == d['post_location_tag']:
                         attribute = "CimeAugmenter"
                     elif request.form['Filter_select'] == "Add user country":
+                        attribute = "GeotextAugmenter"
+                    elif request.form['Filter_select'] == d['user_location_tag']:
                         attribute = "GeotextAugmenter"
                     #else:
                     #    attribute = [request.form['latitude_text'], request.form['longitude_text']]
@@ -343,7 +347,7 @@ def index():
                         attribute = "NSFWClassifier"
                     elif request.form['Filter_select'] == d['post_location_tag']:
                         attribute = "CimeAugmenter"
-                    elif request.form['Filter_select'] == "Add user country":
+                    elif request.form['Filter_select'] == d['user_location_tag']:
                         attribute = "GeotextAugmenter"
                     else:
                         attribute = [request.form['latitude_text'], request.form['longitude_text']]
@@ -494,6 +498,7 @@ def index():
                       confidence_, alert, locations, uuid, mystuff)
 
     hasmap, df = checkmap(csv_contents)
+    hasuserloc = check_user_loc(csv_contents)
     mapdata = map(small=True) if hasmap else None
 
     # Tracking
@@ -505,7 +510,8 @@ def index():
 
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
-                           number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata, moreparams=moreparams, firsttime=firsttime)
+                           number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata,
+                           moreparams=moreparams, firsttime=firsttime, hasuserloc=hasuserloc)
 
 @app.route("/downloadCSV")
 def downloadCSV():
@@ -535,6 +541,18 @@ def checkmap(csv_contents):
         return True, df
 
     return False, None
+
+def check_user_loc(csv_contents):
+    lastid = len(csv_contents) - 1 # only last id
+    try:
+        df = csv_contents[lastid]
+        tmp = StringIO(df)
+        df = pd.read_csv(tmp)
+    except Exception:
+        return False
+    if 'GeotextAugmenter' in df:
+        return True
+    return False
 
 @app.route('/map', methods=['GET','POST'])
 def map(small=False):

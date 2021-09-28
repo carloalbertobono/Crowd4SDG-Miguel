@@ -8,9 +8,9 @@ d['flood_tag'] = "Select event: flooding"
 d['scene_tag'] = "Select scene:"
 d['object_tag'] = "Select object (YOLO):"
 d['object_tag_detr'] = "Select object (DETR):"
-d['post_location_tag'] = "Add location information"
-d['user_location_tag'] = "Add user country"
-d['user_location_sel_tag'] = "Select user location:"
+d['post_location_tag'] = "Show post locations on a map"
+d['user_location_tag'] = "Show author locations on a map"
+d['user_location_sel_tag'] = "Select authors from:"
 
 def get_tags():
     return d

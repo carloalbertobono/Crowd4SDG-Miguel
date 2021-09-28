@@ -8,7 +8,7 @@
 
 <div class="content">
 
-    <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+    <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; box-shadow: 5px 10px #888888;">
         <div><span>
           <img src="/static/images/Crowd4SDG.png" style="height: 75px;flex-basis: 10%;">
         </span></div>
@@ -17,11 +17,16 @@
           <img src="/static/images/Logo_polimi.png" style="height: 45px;flex-basis: 20%;">
         </span></div>
     </div>
-    <h1 class= "logo">
+
+    <div style="background-color: rgb(211,211,211);">
+
+    <h1 class= "logo" style="color: black;">
         <img src="/static/images/VisualCit.png" style="height: 60px;">   
         Pipeline Interface 
     </h1>
     <br style="line-height: 5px" />
+
+
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -97,7 +102,9 @@
                 <optgroup label="Location">
                   <option value="{{ post_location_tag }}" {% if applied[x].Filter == post_location_tag %} selected {% endif %}>{{ post_location_tag }}</option>
                   <option value="{{ user_location_tag }}" {% if applied[x].Filter == user_location_tag %} selected {% endif %}>{{ user_location_tag }}</option>
-                  <option value="{{ user_location_sel_tag }}" {% if applied[x].Filter == user_location_sel_tag %} selected {% endif %}>{{ user_location_sel_tag }}</option>
+                  {% if hasuserloc %}
+                    <option value="{{ user_location_sel_tag }}" {% if applied[x].Filter == user_location_sel_tag %} selected {% endif %}>{{ user_location_sel_tag }}</option>
+                  {% endif %}
                 </optgroup>
 
                 <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>-->
@@ -242,15 +249,17 @@
     <br style="line-height: 5px" />
     <div class= "reset">
         <form method="POST">
-            <button type="submit" class="reset_button" name="reset_button" style="background-color: Tomato;" value="">Reset Page</button>
-        </form>
+            <button type="submit" name="reset_button" value="">Reset Page</button>
         {% if count > 0 %}
-        <br style="line-height: 5px" />
          <a href="/batch" target="_blank">
             <button id= "batch" type="button" name="batch" value="0" >Get configuration for this pipeline</button>
         </a>
         {% endif %}
+
+        </form>
     </div>
+    <br style="line-height: 5px" />
+    <br style="line-height: 5px" />
 
 </div>
 
@@ -265,6 +274,8 @@
         Your browser doesn't support the `<video>` tag. /*this is a fallback*/
         </video>
   </div>
+
+</div>
 
 </div>
 
@@ -298,13 +309,11 @@ window.onclick = function(event) {
 
 </script>
 
-
-
 <!--footer class="bg-light small px-3 py-3 mt-auto" id="footer"-->
 <footer class="footer2">
         <div class="container-fluid">
             <div class="float-right">
-                VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark Carman, Barbara Pernici, and others...
+                VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark Carman, Barbara Pernici, Jacopo Frasson, and others...
             </div>
         </div>
 </footer>
