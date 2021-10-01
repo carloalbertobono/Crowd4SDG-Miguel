@@ -167,8 +167,7 @@ def index():
                 option = request.form['source']
                 keywords = request.form['keywords']
                 number_images = request.form['number_pic']
-                #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETUZnzuvqtlHv0iHyyOI0MYBO7O1yFXIqu0QPeIhHUJZnw?Download=1"
-                #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/ETpS3YrdzspLjVs9TGF7JksBSVwPjpVWYKSdEAEqYEMW_w?Download=1"                
+
                 r = requests.post('http://'+address+'/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
                                         'count': number_images,
@@ -223,7 +222,7 @@ def index():
                         attribute = "PHashDeduplicator"
                         extraparams['bits'] = request.form['bit']
                     elif request.form['Filter_select'] == d['meme']:
-                        attribute = "MemeDetector"
+                        attribute = "MemeClassifier"
                     elif request.form['Filter_select'] == d['scene_tag']:
                         attribute = 'SceneClassifier'
                         extraparams['object'] = request.form['option1_select']
@@ -231,7 +230,7 @@ def index():
                         attribute = 'YOLOv3ObjectDetector'
                         extraparams['object'] = request.form['option2_select']
                     elif request.form['Filter_select'] == d['object_tag_detr']:
-                        attribute = 'DETRObjectDetector'
+                        attribute = 'DETRObjectClassifier'
                         extraparams['object'] = request.form['option_obj_select']
                     elif request.form['Filter_select'] == d['flood_tag']:
                         attribute = "FloodClassifier"
@@ -259,13 +258,14 @@ def index():
                     filter_params = {'confidence': confidence}
                     for k,v in extraparams.items():
                         filter_params[k] = v
-                    params = {'filters': [{attribute: filter_params}],
+                    filter_params['name'] = attribute
+                    params = {'actions': [filter_params],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[count - 1]
                               }
 
-                    print("###", params['filters'])
-                    r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
+                    print("###", params['actions'])
+                    r = requests.post(url='http://'+address+'/Action/API/FilterCSV', json=params)
                     
                     if len(r.text) > 160:
                         f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
@@ -331,7 +331,7 @@ def index():
                         attribute = "PHashDeduplicator"
                         extraparams['bits'] = request.form['bit']
                     elif request.form['Filter_select'] == d['meme']:
-                        attribute = "MemeDetector"
+                        attribute = "MemeClassifier"
                     elif request.form['Filter_select'] == d['scene_tag']:
                         attribute = 'SceneClassifier'
                         extraparams['object'] = request.form['option1_select']
@@ -339,7 +339,7 @@ def index():
                         attribute = 'YOLOv3ObjectDetector'
                         extraparams['object'] = request.form['option2_select']
                     elif request.form['Filter_select'] == d['object_tag_detr']:
-                        attribute = 'DETRObjectDetector'
+                        attribute = 'DETRObjectClassifier'
                         extraparams['object'] = request.form['option_obj_select']
                     elif request.form['Filter_select'] == d['flood_tag']:
                         attribute = "FloodClassifier"
@@ -359,14 +359,14 @@ def index():
                     filter_params = {'confidence': confidence}
                     for k, v in extraparams.items():
                         filter_params[k] = v
-                    params = {'filters': [{attribute: filter_params}],
+                    params = {'actions': [{attribute: filter_params}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count - 1]
                               }
 
-                    print("###", params['filters'])
+                    print("###", params['actions'])
                     
-                    r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
+                    r = requests.post(url='http://'+address+'/Action/API/FilterCSV', json=params)
                     #print(len(r.text))
                     if len(r.text) > 160:
                         f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
@@ -440,11 +440,12 @@ def index():
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
-                    params = {'filters': [{applied[sel_count-2+a]['Attribute']: {'confidence': int(applied[sel_count-2+a]['Confidence'])/100}}],
+                    params = {'actions': [{'name': applied[sel_count-2+a]['Attribute'],
+                              'confidence': int(applied[sel_count-2+a]['Confidence'])/100}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count-2+a]
                               }
-                    r = requests.post(url='http://'+address+'/Filter/API/FilterCSV', json=params)
+                    r = requests.post(url='http://'+address+'/Action/API/FilterCSV', json=params)
                     if len(r.text) > 160:
 
                         csv_contents[sel_count-1+a] = r.text
@@ -614,7 +615,7 @@ def batch():
          'column_name': 'media_url',
          'source': source_applied[0]['source'],
          'query': source_applied[0]['keywords'],
-         'filters': []}
+         'actions': []}
 
     filters = applied[:-1]
     for f in filters:
@@ -627,7 +628,7 @@ def batch():
         del config['Confidence']
         del config['Filter']
 
-        j['filters'].append({key :  config})
+        j['actions'].append({key :  config})
 
     return jsonify(j)
 
