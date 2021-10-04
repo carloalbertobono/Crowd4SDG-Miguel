@@ -227,7 +227,7 @@ def index():
                         attribute = 'SceneClassifier'
                         extraparams['object'] = request.form['option1_select']
                     elif request.form['Filter_select'] == d['object_tag']:
-                        attribute = 'YOLOv3ObjectDetector'
+                        attribute = 'YOLOv5ObjectDetector'
                         extraparams['object'] = request.form['option2_select']
                     elif request.form['Filter_select'] == d['object_tag_detr']:
                         attribute = 'DETRObjectClassifier'
@@ -336,7 +336,7 @@ def index():
                         attribute = 'SceneClassifier'
                         extraparams['object'] = request.form['option1_select']
                     elif request.form['Filter_select'] == d['object_tag']:
-                        attribute = 'YOLOv3ObjectDetector'
+                        attribute = 'YOLOv5ObjectDetector'
                         extraparams['object'] = request.form['option2_select']
                     elif request.form['Filter_select'] == d['object_tag_detr']:
                         attribute = 'DETRObjectClassifier'
@@ -620,15 +620,15 @@ def batch():
     filters = applied[:-1]
     for f in filters:
         f = copy.deepcopy(f)
-        key = f['Attribute']
         config = f
+        config['name'] = f['Attribute']
         del config['Attribute']
         del config['ID']
         config['confidence'] = config['Confidence']
         del config['Confidence']
         del config['Filter']
 
-        j['actions'].append({key :  config})
+        j['actions'].append(config)
 
     return jsonify(j)
 
