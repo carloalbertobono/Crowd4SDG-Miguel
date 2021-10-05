@@ -24,7 +24,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 GA_TRACKING_ID = "UA-208620802-1"
 
 server = '131.175.120.2:7779'
-test = '127.0.0.1:8000'
+test = '127.0.0.1:12345'
 
 address = test
 
