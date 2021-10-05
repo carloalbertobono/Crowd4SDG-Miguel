@@ -95,7 +95,7 @@
                 <optgroup label="Selection">
                   <option value="{{ scene_tag }}" {% if applied[x].Filter == scene_tag %} selected {% endif %}>{{ scene_tag }}</option>
                   <option value="{{ object_tag }}" {% if applied[x].Filter == object_tag %} selected {% endif %}>{{ object_tag }}</option>
-                  <option value="{{ object_tag_detr }}" {% if applied[x].Filter == object_tag_detr %} selected {% endif %}>{{ object_tag_detr }}</option>
+                  <!--option value="{{ object_tag_detr }}" {% if applied[x].Filter == object_tag_detr %} selected {% endif %}>{{ object_tag_detr }}</option-->
                   <option value="{{ flood_tag }}" {% if applied[x].Filter == flood_tag %} selected {% endif %}>{{ flood_tag }}</option>
 
                 </optgroup>
@@ -175,6 +175,8 @@
             <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
             <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold (%):</label>
             <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="number" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
+            <label id={{"label_min"~(x+1)}} for={{"min_items"~(x+1)}} {% if applied[x].Filter == object_tag %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Min items:</label>
+            <input id={{"min_items"~(x+1)}} name="min_items" value={% if applied[x].min_items is defined %}{{ applied[x].min_items }}{% else %}1{% endif %} type="number" min="1" max="10" step="1" {% if applied[x].Filter == object_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <label id={{"label_bit"~(x+1)}} for={{"bit"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Similarity threshold (lower values mean less sensitive):</label>
             <input id={{"bit"~(x+1)}} name="bit" value={% if applied[x].bits is defined %}{{ applied[x].bits }}{% else %}8{% endif %} type="int" min="0" max="10" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
             <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}} nom={{ tweets[x]|length }}>Apply</button>
@@ -331,6 +333,8 @@ window.onclick = function(event) {
             let longitude_text = document.getElementById('longitude'+a);
             let confidence_numb = document.getElementById('confidence'+a);
             let confidence_label = document.getElementById('label'+a);
+            let min_items_numb = document.getElementById('min_items'+a);
+            let min_items_label = document.getElementById('label_min'+a);
             let label_bit = document.getElementById('label_bit'+a);
 
             Filter_select.onchange = function() {
@@ -341,7 +345,7 @@ window.onclick = function(event) {
                 }
                 else {
                 confidence_label.style.display='none';
-                confidence_numb.style.display='none';                
+                confidence_numb.style.display='none';
                 }
                 if(Filter == '{{ duplicates_tag }}') {
                     bit_select.style.display='inline';
@@ -359,9 +363,13 @@ window.onclick = function(event) {
                 }
                 if(Filter == '{{ object_tag }}') {
                     option2_select.style.display='inline';
+                    min_items_numb.style.display='inline';
+                    min_items_label.style.display='inline';
                 }
                 else {
                     option2_select.style.display='none';
+                    min_items_numb.style.display='none';
+                    min_items_label.style.display='none';
                 }
                 if(Filter == '{{ object_tag_detr }}') {
                     option_obj_select.style.display='inline';

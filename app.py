@@ -246,6 +246,10 @@ def index():
                     #    attribute = [request.form['latitude_text'], request.form['longitude_text']]
                     confidence_ = request.form['confidence']
                     confidence = float(confidence_)/100
+
+                    min_items = request.form['min_items']
+                    print("###", min_items)
+
                     #url_csv = "https://polimi365-my.sharepoint.com/:x:/g/personal/10787953_polimi_it/EczlUzJfhFdFjwNqc8NThlQB-pYmb6CbxDZbxbwB4xHQCQ?Download=1"
                     params = {'filter_name_list': [attribute],
                               #'confidence_threshold_list': [float(attribute.split()[1])],
@@ -259,16 +263,17 @@ def index():
                     for k,v in extraparams.items():
                         filter_params[k] = v
                     filter_params['name'] = attribute
+                    if min_items: filter_params['min_items'] = min_items
+
                     params = {'actions': [filter_params],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[count - 1]
                               }
 
-                    print("###", params['actions'])
                     r = requests.post(url='http://'+address+'/Action/API/FilterCSV', json=params)
                     
                     if len(r.text) > 160:
-                        f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
+                        f = {'ID': count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_, "min_items": min_items}
                         f = {**extraparams, **f}
                         k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 90}
                         applied[count-1] = f
@@ -355,21 +360,23 @@ def index():
                     confidence_ = request.form['confidence'] # form value
                     confidence = float(confidence_)/100 # post value
 
+                    min_items = request.form['min_items']
+
                     # build filters
                     filter_params = {'confidence': confidence}
+                    if min_items: filter_params['min_items'] = min_items
+
                     for k, v in extraparams.items():
                         filter_params[k] = v
                     params = {'actions': [{attribute: filter_params}],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count - 1]
                               }
-
-                    print("###", params['actions'])
                     
                     r = requests.post(url='http://'+address+'/Action/API/FilterCSV', json=params)
                     #print(len(r.text))
                     if len(r.text) > 160:
-                        f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
+                        f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_, 'min_items': min_items}
                         f = {**extraparams, **f}
                         applied[sel_count-1] = f
                         csv_contents[sel_count] = r.text                    
@@ -504,10 +511,7 @@ def index():
 
     # Tracking
     if ga:
-        print("TRACKING")
         track_event(ga)
-    else:
-        print("NOT TRACKING")
 
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
