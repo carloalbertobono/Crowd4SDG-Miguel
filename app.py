@@ -24,9 +24,13 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 GA_TRACKING_ID = "UA-208620802-1"
 
 server = '131.175.120.2:7779'
-test = '127.0.0.1:12345'
+test = '127.0.0.1:8000'
 
 address = test
+
+#<!--img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text + "\n\nUser location: " + tweets[0][u].user_country + "\n\nTweet location: " + tweets[0][u].tweet_location}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/-->
+#<!--img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text + "\n\nUser location: " + tweets[x+1][u].user_country + "\n\nTweet location: " + tweets[x+1][u].tweet_location }}' style="display: inline-block;" loading="lazy"/ -->
+
 
 def failsafe(df):
     if 'user_country' not in df:
@@ -114,7 +118,8 @@ def index():
                 r = requests.post('http://'+address+'/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
                                         'count': number_images,
-                                        'preload_images': True})
+                                        'preload_images': True,
+                                        'source': option})
             
                 if len(r.text) != 1:
 
@@ -126,6 +131,7 @@ def index():
 
                     tmp= StringIO(r.text)
                     df= pd.read_csv(tmp)
+                    print(df.columns)
                     failsafe(df)
 
                     u = []
@@ -171,7 +177,8 @@ def index():
                 r = requests.post('http://'+address+'/Crawler/API/CrawlCSV',
                                   json={'query': keywords,
                                         'count': number_images,
-                                        'preload_images': True})
+                                        'preload_images': True,
+                                        'source': option})
                 if len(r.text) != 1:                    
                     s = {'ID': 0, 'source': option, 'keywords': keywords}
                     source_applied[0]= s

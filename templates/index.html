@@ -32,11 +32,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 
-
     <div class= "source">
         <form method="POST">
             <select id="source" name="source">
                 <option value="Twitter"{% if source_applied[0].source == "Twitter" %}selected{%endif%}>Twitter</option>
+                <option value="Flickr"{% if source_applied[0].source == "Flickr" %}selected{%endif%}>Flickr</option>
                <!-- 
                 <option value="Flickr"{% if source_applied[0].source == "Flickr" %}selected{%endif%}>Flickr</option>
                 <option value="Reddit"{% if source_applied[0].source == "Reddit" %}selected{%endif%}>Reddit</option> -->
@@ -54,10 +54,11 @@
         {% endif %}
         {% for s in source_applied %}
         {% if s.source != "" %}
-        {% if s.source == 'Twitter' %}
+        {% if s.source == 'Twitter' or s.source == 'Flickr' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text + "\n\nUser location: " + tweets[0][u].user_country + "\n\nTweet location: " + tweets[0][u].tweet_location}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/>
+
+                    <img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/>
                     <!--
                     <div class= "overlay">
                         <div class= "text"> {{tweets[0][u].text}}</div>
@@ -198,15 +199,15 @@
         {% if tweets[x+1]|length < number %}
             {% set number= tweets[x+1]|length %}
         {% endif %}
-        {% if s.source == 'Twitter' %}
+        {% if s.source == 'Twitter' or s.source == 'Flickr' %}
 
             {# % if not hasmap or count != x+2 % #}
             {% if not hasmap or applied[x].Filter != post_location_tag %}
 
             <div class="container">
                 {% for u in range(number) %}
-                    <img src= {{ tweets[x+1][u].url }} height=100 title= '{{tweets[x+1][u].text + "\n\nUser location: " + tweets[x+1][u].user_country + "\n\nTweet location: " + tweets[x+1][u].tweet_location }}' style="display: inline-block;" loading="lazy"/>
 
+                <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}}' style="display: inline-block;" loading="lazy"/>
                 {% endfor %}
 
             </div>
