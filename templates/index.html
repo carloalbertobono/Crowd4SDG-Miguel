@@ -496,23 +496,22 @@ window.onclick = function(event) {
         progressBar = document.getElementById('progressBar'+a),
         applyButton = document.getElementById('apply_button'+a)
         duration = applyButton.getAttribute("nom") * 1000,
-        console.log(duration)
-        currentProgess = 0,
-        steps = 10;
 
-        progressBar.setAttribute("max", duration);
+        current_progress = 0,
+
+        progressBar.setAttribute("max", 100);
 
         $(container).css("display", "inline");
 
-        var timer = setInterval(function () {
-            currentProgess += steps;
-            progressBar.setAttribute('value', currentProgess);
-
-            if (currentProgess >= duration) {
-                clearInterval(timer);
-                // $(container).css("display", "none");
-            }
-        }, steps);
+        var step = 0.01;
+        var timer = setInterval(function() {
+                current_progress += step;
+                progress = Math.round(Math.atan(current_progress) / (Math.PI / 2) * 100 * 1000) / 1000
+                progressBar.setAttribute('value', progress);
+                if (progress >= 100){
+                            clearInterval(interval);
+                }
+            }, 100);
     }
     </script>
 
