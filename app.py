@@ -105,6 +105,8 @@ def index():
     print(applied)
     print(source_applied)
 
+    print(count, len(applied), len(source_applied), len(tweets), len(csv_contents))
+
     print("GOT REQUEST FROM", uuid, "GA:", ga)
 
     if request.method == "POST":
@@ -221,7 +223,10 @@ def index():
                     
         # After the crawling
         elif 'apply_button' in request.form:
+
+
             if int(request.form['apply_button']) == count:
+                print("EQUAL COUNT")
                 extraparams={}
                 if request.form['Filter_select'] != "" and request.form['Filter_select'] != d['user_location_sel_tag'] :
                     Filter = request.form['Filter_select']
@@ -270,6 +275,7 @@ def index():
                     for k,v in extraparams.items():
                         filter_params[k] = v
                     filter_params['name'] = attribute
+                    extraparams['name'] = attribute
                     if min_items: filter_params['min_items'] = min_items
 
                     params = {'actions': [filter_params],
@@ -331,9 +337,14 @@ def index():
                 #else:
                 #    flash('Select an option')
                 #    applied[count-1]['Filter'] = ""
+
             # not last request
             else:
+
                 sel_count = int(request.form['apply_button'])
+                print("NOT LAST", sel_count)
+
+                print("FIRST", count, len(applied), len(source_applied), len(tweets), len(csv_contents))
 
                 extraparams = {}
 
@@ -373,9 +384,12 @@ def index():
                     filter_params = {'confidence': confidence}
                     if min_items: filter_params['min_items'] = min_items
 
+                    filter_params['name'] = attribute
+                    extraparams['name'] = attribute
+
                     for k, v in extraparams.items():
                         filter_params[k] = v
-                    params = {'actions': [{attribute: filter_params}],
+                    params = {'actions': [filter_params],
                               'column_name': 'media_url',
                               'csv_file': csv_contents[sel_count - 1]
                               }
@@ -386,7 +400,10 @@ def index():
                         f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_, 'min_items': min_items}
                         f = {**extraparams, **f}
                         applied[sel_count-1] = f
-                        csv_contents[sel_count] = r.text                    
+                        k = {'ID': "", 'Filter': "", 'Attribute': "", 'Confidence': 90}
+                        applied[sel_count] = k
+
+                        csv_contents[sel_count] = r.text
                         #url_csv_get = requests.get(url_csv)
                         #url_request = io.StringIO(url_csv_get.content.decode('utf-8'))
                         tmp= StringIO(r.text)
@@ -400,32 +417,41 @@ def index():
                         for x in range(len(df)):
                             p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
                             u.append(p)
-                        tweets[sel_count]= u 
+                        tweets[sel_count]= u
                         alert = ""
                     else:
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (2)"
-                
-                elif request.form['Filter_select'] == d['user_location_sel_tag'] :
-                    Filter = d['user_location_sel_tag']
-                    attribute = request.form['option3_select']
-                    f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
-                    applied[sel_count-1] = f                  
-                    tmp = StringIO(csv_contents[sel_count-1])
-                    df0 = pd.read_csv(tmp)
-                    df = df0.loc[df0['user_country'] == attribute]
-                    failsafe(df)
+
+                #elif request.form['Filter_select'] == d['user_location_sel_tag'] :
+                #    Filter = d['user_location_sel_tag']
+                #    attribute = request.form['option3_select']
+                #    f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
+                #    applied[sel_count-1] = f
+                #    tmp = StringIO(csv_contents[sel_count-1])
+                #    df0 = pd.read_csv(tmp)
+                #    df = df0.loc[df0['user_country'] == attribute]
+                #    failsafe(df)
+                #    df_sorted = df.sort_values(by=['user_country'], ascending = True)
+                #    locations[sel_count]= df_sorted['user_country'].astype(str).unique().tolist()
+                #    u = []
+                #    for x in range(len(df)):
+                #        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                #        u.append(p)
+                #    tweets[sel_count]= u
+                #    csv_string = df.to_csv(encoding= "utf-8")
+                #    csv_contents[sel_count]= csv_string
+                #    alert = ""
 
 
-                    df_sorted = df.sort_values(by=['user_country'], ascending = True)
-                    locations[sel_count]= df_sorted['user_country'].astype(str).unique().tolist()
-                    u = []
-                    for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
-                        u.append(p)
-                    tweets[sel_count]= u                     
-                    csv_string = df.to_csv(encoding= "utf-8")
-                    csv_contents[sel_count]= csv_string
-                    alert = ""
+                source_applied = source_applied[:2]
+                applied = applied[:sel_count + 1]
+                tweets = tweets[:sel_count+1]
+                csv_contents = csv_contents[:sel_count+1]
+                locations = locations[:sel_count+1]
+
+                count = sel_count + 1
+
+                print("THEN", count, len(applied), len(source_applied), len(tweets), len(csv_contents))
                 #else:
                 #    flash('Select an option')
                 #    applied[sel_count-1]['Filter'] = ""

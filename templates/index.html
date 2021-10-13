@@ -85,7 +85,7 @@
         {% if count>0 %}
         {% for x in range(count) %}
         <form method="POST" id={{"poster"~(x+1)}}>
-            <button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;"></i></button>
+            <button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;display:none;"></i></button>
             <select id={{"Filter"~(x+1)}} name="Filter_select" required>
                 <option value="">-Select-</option>
                 <optgroup label="Preprocessing">
