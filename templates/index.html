@@ -136,9 +136,36 @@
                 <option value="Night" {% if applied[x].Attribute == "Night" %} selected {% endif %}>Night</option> -->
             </select>
             <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == object_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                {% for obj in moreparams.get('coco') %}
+                <optgroup label="People and animals">
+                    {% for obj in moreparams.get('coco_animals') %}
                     <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                {% endfor %}
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Transportation means">
+                    {% for obj in moreparams.get('coco_transport') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Landmarks">
+                    {% for obj in moreparams.get('coco_landmarks') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Devices">
+                    {% for obj in moreparams.get('coco_devices') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Food">
+                    {% for obj in moreparams.get('coco_food') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Other">
+                    {% for obj in moreparams.get('coco_other') %}
+                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                    {% endfor %}
+                </optgroup>
 
                 <!--option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %} selected {% endif %}>Person</option--!>
             </select>
