@@ -21,7 +21,26 @@ geolocator = Nominatim(user_agent="example app")
 
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
-GA_TRACKING_ID = "UA-208620802-1"
+import asyncio
+
+def get_or_create_eventloop():
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            return asyncio.get_event_loop()
+
+# For tracking GA without waiting for response
+def fire_and_forget(f):
+    def wrapped(*args, **kwargs):
+        loop = get_or_create_eventloop()
+        return loop.run_in_executor(None, f, *args, *kwargs)
+
+    return wrapped
+
+GA_TRACKING_ID = "UA-210743922-1" # "UA-208620802-1"
 
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
@@ -55,6 +74,7 @@ moreparams['coco_landmarks'] = ['traffic light','fire hydrant','stop sign','park
 moreparams['coco_devices'] = ['tv','monitor','laptop','mouse','remote','keyboard','cell phone']
 moreparams['coco_food'] = ['banana','apple','sandwich','orange','broccoli','carrot','hot dog','pizza','donut','cake']
 moreparams['coco_other'] = ['backpack','umbrella','handbag','tie','suitcase','frisbee','skis','snowboard','sports ball','kite','baseball bat','baseball glove','surfboard','tennis racket','bottle','wine glass','cup','fork','knife','spoon','bowl','couch', 'chair','sofa','pottedplant','bed','dining table','toilet','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddy bear','hair drier','toothbrush']
+
 
 def get_or_setandget(mydict, key, default):
     if key not in mydict:
@@ -121,7 +141,20 @@ def index():
     if request.method == "POST":
         # Before the crawling
         if 'source_button' in request.form:
+
+            # Someone hit search, we just reset (so we should never fall in the "else" branch after the following if)
+            count = 0
+            source_applied = []
+            s0 = {'ID': "", 'source': "", 'keywords': ""}
+            source_applied.append(s0)
+            applied = []
+            tweets = []
+            csv_contents = []
+            locations = []
+            alert = ""
+
             if count == 0:
+                print("Crawling at count 0")
                 option = request.form['source']
                 keywords = request.form['keywords']
                 number_images = request.form['number_pic']
@@ -181,6 +214,7 @@ def index():
                     alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional. Also refer to the <a href=\"https://developer.twitter.com/en/docs/twitter-api/v1/rules-and-filtering/search-operators\">Twitter user guide</a>"
 
             else:
+                print("Crawling not as count 0")
                 option = request.form['source']
                 keywords = request.form['keywords']
                 number_images = request.form['number_pic']
@@ -690,6 +724,8 @@ def batch():
 
     return jsonify(j)
 
+# Do it async
+@fire_and_forget
 def track_event(cid, type = 'event', category = 'test', action = 'test', label = 'test', value=1):
     data = {
         'v': '1',  # API Version.
