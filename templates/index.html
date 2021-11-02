@@ -57,7 +57,7 @@
         {% if s.source == 'Twitter' or s.source == 'Flickr' %}
             <div class="container">
                 {% for u in range(number) %}
-                    <a href='https://twitter.com/anyuser/status/{{tweets[0][u].id}}' target='_blank'>
+                    <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[0][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[0][u].id)}}' {% endif %} target='_blank'>
                     <img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/>
                     </a>
                     <!--
@@ -218,7 +218,7 @@
 
             <div class="container">
                 {% for u in range(number) %}
-                <a href='https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' target='_blank'>
+                <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[x+1][u].id)}}' {% endif %} target='_blank'>
                 <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
                 </a>
                 {% endfor %}
