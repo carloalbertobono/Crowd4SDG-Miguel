@@ -102,6 +102,7 @@
                   <option value="{{ flood_tag }}" {% if applied[x].Filter == flood_tag %} selected {% endif %}>{{ flood_tag }}</option>
 
                 </optgroup>
+                {% if source_applied[0].source == 'Twitter' %}
                 <optgroup label="Location">
                   <option value="{{ post_location_tag }}" {% if applied[x].Filter == post_location_tag %} selected {% endif %}>{{ post_location_tag }}</option>
                   <option value="{{ user_location_tag }}" {% if applied[x].Filter == user_location_tag %} selected {% endif %}>{{ user_location_tag }}</option>
@@ -109,6 +110,7 @@
                     <option value="{{ user_location_sel_tag }}" {% if applied[x].Filter == user_location_sel_tag %} selected {% endif %}>{{ user_location_sel_tag }}</option>
                   {% endif %}
                 </optgroup>
+                {% endif %}
 
                 <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>-->
             </select>
