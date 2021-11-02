@@ -159,7 +159,7 @@ def index():
                     u = []
                     for x in range(len(df)):
                         p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x],
-                             "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                             "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], "id": df['id'].iloc[x]}
                         u.append(p)
                         continue  # TODO: we are bypassing geo enrichment her
 
@@ -214,7 +214,7 @@ def index():
                     for x in range(len(df)):
 
                         p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x],
-                             "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                             "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], 'id': df['id'].iloc[x]}
                         u.append(p)
                         continue  # TODO: we are bypassing geo enrichment her
 
@@ -327,7 +327,7 @@ def index():
                         locations.append(df_sorted['user_country'].astype(str).unique().tolist())
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], "id": df['id'].iloc[x]}
                             u.append(p)
                         tweets.append(u)
                         count+=1
@@ -352,7 +352,7 @@ def index():
                     locations.append(df_sorted['user_country'].astype(str).unique().tolist())
                     u = []
                     for x in range(len(df)):
-                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], "id": df['id'].iloc[x]}
                         u.append(p)
                     tweets.append(u)                     
                     csv_string = df.to_csv(encoding= "utf-8")
@@ -446,7 +446,7 @@ def index():
                         locations[sel_count]= df_sorted['user_country'].astype(str).unique().tolist()
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], "id": df['id'].iloc[x]}
                             u.append(p)
                         tweets[sel_count]= u
                         alert = ""
@@ -530,7 +530,7 @@ def index():
                         locations[sel_count-1+a]= df_sorted['user_country'].astype(str).unique().tolist()
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], "id": df['id'].iloc[x]}
                             u.append(p)
                         tweets[sel_count-1+a]= u
                         alert = ""
@@ -553,7 +553,7 @@ def index():
                         locations[sel_count-1+a]= df_sorted['user_country'].astype(str).unique().tolist()
                         u = []
                         for x in range(len(df)):
-                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
+                            p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], "id": df['id'].iloc[x]}
                             u.append(p)
                         tweets[sel_count-1+a]= u                     
                         csv_contents[sel_count-1+a]= csv_string

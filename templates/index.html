@@ -57,8 +57,9 @@
         {% if s.source == 'Twitter' or s.source == 'Flickr' %}
             <div class="container">
                 {% for u in range(number) %}
-
+                    <a href='https://twitter.com/anyuser/status/{{tweets[0][u].id}}' target='_blank'>
                     <img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/>
+                    </a>
                     <!--
                     <div class= "overlay">
                         <div class= "text"> {{tweets[0][u].text}}</div>
@@ -215,8 +216,9 @@
 
             <div class="container">
                 {% for u in range(number) %}
-
-                <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}}' style="display: inline-block;" loading="lazy"/>
+                <a href='https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' target='_blank'>
+                <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
+                </a>
                 {% endfor %}
 
             </div>
