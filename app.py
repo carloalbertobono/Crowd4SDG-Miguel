@@ -21,27 +21,6 @@ geolocator = Nominatim(user_agent="example app")
 
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
-import asyncio
-
-def get_or_create_eventloop():
-    try:
-        return asyncio.get_event_loop()
-    except RuntimeError as ex:
-        if "There is no current event loop in thread" in str(ex):
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            return asyncio.get_event_loop()
-
-# For tracking GA without waiting for response
-def fire_and_forget(f):
-    def wrapped(*args, **kwargs):
-        loop = get_or_create_eventloop()
-        return loop.run_in_executor(None, f, *args, *kwargs)
-
-    return wrapped
-
-GA_TRACKING_ID = "UA-210743922-1" # "UA-208620802-1"
-
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
 
@@ -74,7 +53,6 @@ moreparams['coco_landmarks'] = ['traffic light','fire hydrant','stop sign','park
 moreparams['coco_devices'] = ['tv','monitor','laptop','mouse','remote','keyboard','cell phone']
 moreparams['coco_food'] = ['banana','apple','sandwich','orange','broccoli','carrot','hot dog','pizza','donut','cake']
 moreparams['coco_other'] = ['backpack','umbrella','handbag','tie','suitcase','frisbee','skis','snowboard','sports ball','kite','baseball bat','baseball glove','surfboard','tennis racket','bottle','wine glass','cup','fork','knife','spoon','bowl','couch', 'chair','sofa','pottedplant','bed','dining table','toilet','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddy bear','hair drier','toothbrush']
-
 
 def get_or_setandget(mydict, key, default):
     if key not in mydict:
@@ -724,6 +702,28 @@ def batch():
 
     return jsonify(j)
 
+
+import asyncio
+
+def get_or_create_eventloop():
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            return asyncio.get_event_loop()
+
+# For tracking GA without waiting for response (otherwise is locking awaiting for possible events fired aftwerward)
+def fire_and_forget(f):
+    def wrapped(*args, **kwargs):
+        loop = get_or_create_eventloop()
+        return loop.run_in_executor(None, f, *args, *kwargs)
+
+    return wrapped
+
+GA_TRACKING_ID = "UA-210743922-1" # "UA-208620802-1"
+
 # Do it async
 @fire_and_forget
 def track_event(cid, type = 'event', category = 'test', action = 'test', label = 'test', value=1):
@@ -751,7 +751,17 @@ def track_event(cid, type = 'event', category = 'test', action = 'test', label =
 
 if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
+    #app.config['SERVER_NAME'] = address
+    #app.config['SESSION_COOKIE_DOMAIN'] = address
+    #app.config['REMEMBER_COOKIE_SECURE'] = False
+    #app.config['SESSION_COOKIE_SECURE'] = False
+    #app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    #app.config['SESSION_COOKIE_HTTPONLY'] = True
+    #app.config['SESSION_COOKIE_NAME'] = "visualcit_session"
+    #sess.init_app(app)
+    #print(app.config)
     app.run(debug=True, use_reloader=True)
+
 
 @app.context_processor
 def inject_tags():
