@@ -3,8 +3,8 @@ In order to run this interface:
 
 - Create a nice virtual environment 
    - virtualenv -p python3 VIRTUAL
-   - source VIRTUAL/bin/activate
-  or with conda
+   - source VIRTUAL/bin/activate <br />
+  or with conda <br />
    - conda create -n VIRTUAL python=3.8.10
    - conda activate VIRTUAL
 
