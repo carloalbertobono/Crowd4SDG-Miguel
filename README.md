@@ -1,4 +1,4 @@
-# Crowd4SDG-Miguel
+# Crowd4SDG-VisualCit-Interface
 In order to run this interface:
 
 - Create a nice virtual environment 
