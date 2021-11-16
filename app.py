@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, Response, session
+from flask import Flask, render_template, request, flash, redirect, Response, session, make_response
 import pandas as pd
 import requests
 from io import StringIO
@@ -14,6 +14,12 @@ import folium
 from folium.plugins import MarkerCluster
 import json
 import numpy as np
+
+import sqlite3
+con = sqlite3.connect('annotations.db', check_same_thread = False)
+cur = con.cursor()
+cur.execute('''CREATE TABLE IF NOT EXISTS annotations
+               (id text, url text, action text, confidence text, position text, min_items text)''')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Hola'
@@ -129,10 +135,12 @@ def index():
     print(count, len(applied), len(source_applied), len(tweets), len(csv_contents))
 
     print("GOT REQUEST FROM", uuid, "GA:", ga)
+    ga_event = "NOT_INIT"
 
     if request.method == "POST":
         # Before the crawling
         if 'source_button' in request.form:
+            ga_event = 'source_button'
 
             # Someone hit search, we just reset (so we should never fall in the "else" branch after the following if)
             count = 0
@@ -258,6 +266,7 @@ def index():
                     
         # After the crawling
         elif 'apply_button' in request.form:
+            ga_event = 'apply_button'
 
             if int(request.form['apply_button']) == count:
                 print("EQUAL COUNT - ADD")
@@ -501,6 +510,7 @@ def index():
                 #    flash('Select an option')
                 #    applied[sel_count-1]['Filter'] = ""
         elif 'reset_button' in request.form:
+            ga_event = 'reset_button'
             count = 0
             source_applied = []
             s0 = {'ID': "", 'source': "", 'keywords': ""}
@@ -511,6 +521,7 @@ def index():
             locations = []
             alert = ""
         elif 'up_button' in request.form:
+            ga_event = 'up_button'
 
             sel_count = int(request.form['up_button'])
 
@@ -591,7 +602,7 @@ def index():
 
     # Tracking
     if ga:
-        track_event(ga)
+        track_event(cid=ga, type = 'event', category = ga_event, action = 'test', label = 'test', value=1)
 
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
@@ -612,6 +623,22 @@ def downloadCSV():
         mimetype="text/csv",
         headers={"Content-disposition":
                  "attachment; filename=download.csv"})
+
+
+@app.route("/annotate", methods=['POST'])
+def annotate():
+    myjson = request.get_json()
+    print(myjson)
+
+    # Insert a row of data
+    cur.execute("INSERT INTO annotations VALUES (?, ?, ?, ?, ?, ?)", (myjson['id'], myjson['url'], myjson['action'], myjson['confidence'], myjson['position'], myjson['min_items']))
+    con.commit()
+
+
+    response = make_response("I SEE", 200)
+    response.mimetype = "text/plain"
+
+    return response
 
 def checkmap(csv_contents):
     lastid = len(csv_contents) - 1 # only last id
@@ -732,6 +759,8 @@ def get_or_create_eventloop():
 def fire_and_forget(f):
     def wrapped(*args, **kwargs):
         loop = get_or_create_eventloop()
+        print("###", args)
+        print("##", kwargs)
         return loop.run_in_executor(None, f, *args, *kwargs)
 
     return wrapped
@@ -740,7 +769,10 @@ GA_TRACKING_ID = "UA-210743922-1" # "UA-208620802-1"
 
 # Do it async
 @fire_and_forget
-def track_event(cid, type = 'event', category = 'test', action = 'test', label = 'test', value=1):
+def track_event(cid = None, type = 'event', category = 'test', action = 'test', label = 'test', value=1):
+    a = 1
+    type_ = type + 'abcssbsbs'
+    print("#", type, type_, category, action, 'aaa', a, value)
     data = {
         'v': '1',  # API Version.
         'tid': GA_TRACKING_ID,  # Tracking ID / Property ID.
@@ -774,6 +806,7 @@ if __name__ == '__main__':
     #app.config['SESSION_COOKIE_NAME'] = "visualcit_session"
     #sess.init_app(app)
     #print(app.config)
+
     app.run(debug=True, use_reloader=True)
 
 

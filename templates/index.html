@@ -213,14 +213,20 @@
         {% endif %}
         {% if s.source == 'Twitter' or s.source == 'Flickr' %}
 
-            {# % if not hasmap or count != x+2 % #}
             {% if not hasmap or applied[x].Filter != post_location_tag %}
 
             <div class="container">
                 {% for u in range(number) %}
-                <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[x+1][u].id)}}' {% endif %} target='_blank'>
-                <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
-                </a>
+                <div class="image">
+                  <div class="overlay">
+                      <button type="button" class="btn btn-default delete-image-btn pull-right" onClick="makeRequest(this, '{{tweets[x+1][u].id}}', '{{tweets[x+1][u].url}}', '{{applied[x].name}}', '{{applied[x].Confidence}}', '{{applied[x].min_items}}', '{{applied[x].ID}}' )">
+                          X<span class="glyphicon glyphicon-trash"></span>
+                      </button>
+                  </div>
+                  <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[x+1][u].id)}}' {% endif %} target='_blank'>
+                    <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
+                  </a>
+                </div>
                 {% endfor %}
 
             </div>
@@ -276,6 +282,30 @@
     </div>
     <br style="line-height: 5px" />
     <br style="line-height: 5px" />
+
+    <script>
+    function makeRequest(el, myid, myurl, myaction, confidence, min_items, pos) {
+
+      elem = el;
+      fof = elem.parentNode.parentNode;
+      fof.style.display = "none";
+
+      var SendInfo= { "id": myid, "url": myurl, "action": myaction, "confidence": confidence, "position": pos, "min_items": min_items };
+
+        $.ajax({
+            type: 'post',
+            url: 'annotate',
+            data: JSON.stringify(SendInfo),
+            contentType: "application/json; charset=utf-8",
+            traditional: true,
+            success: function (data) {
+                console.log("Annotation has landed in frontend's backend")
+                //alert(data)
+            }
+        });
+      }
+
+    </script>
 
     </div> <!-- # close grey -->
 
