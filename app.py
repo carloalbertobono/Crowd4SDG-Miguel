@@ -634,7 +634,6 @@ def annotate():
     cur.execute("INSERT INTO annotations VALUES (?, ?, ?, ?, ?, ?)", (myjson['id'], myjson['url'], myjson['action'], myjson['confidence'], myjson['position'], myjson['min_items']))
     con.commit()
 
-
     response = make_response("I SEE", 200)
     response.mimetype = "text/plain"
 
