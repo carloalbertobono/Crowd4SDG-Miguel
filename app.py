@@ -391,6 +391,7 @@ def index():
             else:
 
                 sel_count = int(request.form['apply_button'])
+                sel_count = int(request.form['apply_button'])
                 print("NOT LAST", sel_count)
 
                 print("FIRST", count, len(applied), len(source_applied), len(tweets), len(csv_contents))
@@ -475,27 +476,6 @@ def index():
                         alert = ""
                     else:
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (2)"
-
-                #elif request.form['Filter_select'] == d['user_location_sel_tag'] :
-                #    Filter = d['user_location_sel_tag']
-                #    attribute = request.form['option3_select']
-                #    f = {'ID': sel_count, 'Filter': Filter, 'Attribute': attribute, 'Confidence': confidence_}
-                #    applied[sel_count-1] = f
-                #    tmp = StringIO(csv_contents[sel_count-1])
-                #    df0 = pd.read_csv(tmp)
-                #    df = df0.loc[df0['user_country'] == attribute]
-                #    failsafe(df)
-                #    df_sorted = df.sort_values(by=['user_country'], ascending = True)
-                #    locations[sel_count]= df_sorted['user_country'].astype(str).unique().tolist()
-                #    u = []
-                #    for x in range(len(df)):
-                #        p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x]}
-                #        u.append(p)
-                #    tweets[sel_count]= u
-                #    csv_string = df.to_csv(encoding= "utf-8")
-                #    csv_contents[sel_count]= csv_string
-                #    alert = ""
-
 
                 source_applied = source_applied[:2]
                 applied = applied[:sel_count + 1]
@@ -630,10 +610,35 @@ def annotate():
     myjson = request.get_json()
     print(myjson)
 
-    # Insert a row of data
+    # Recover data (we need to modify inputs!)
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
+        session)
+
+    # Remove item
+    mydf = pd.read_csv(StringIO(csv_contents[count - 1]))
+
+    mydf = mydf[mydf.id.astype(str) != myjson['id']]
+
+    # Serialize to string
+    s = StringIO()
+    mydf.to_csv(s)
+    csv_contents[count-1] = s.getvalue()
+
+    # Change tweets to be shown
+    u = []
+    for x in range(len(mydf)):
+        p = {"url": mydf['media_url'].iloc[x], "text": mydf['full_text'].iloc[x],
+             "user_country": mydf['user_country'].iloc[x], "tweet_location": mydf['CIME_geolocation_string'].iloc[x],
+             "id": mydf['id'].iloc[x]}
+        u.append(p)
+
+    tweets[count-1] = u
+
+    # Insert a row of data into some persisted service
     cur.execute("INSERT INTO annotations VALUES (?, ?, ?, ?, ?, ?)", (myjson['id'], myjson['url'], myjson['action'], myjson['confidence'], myjson['position'], myjson['min_items']))
     con.commit()
 
+    # Say hi
     response = make_response("I SEE", 200)
     response.mimetype = "text/plain"
 
