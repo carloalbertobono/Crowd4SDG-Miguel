@@ -286,6 +286,8 @@
     <script>
     function makeRequest(el, myid, myurl, myaction, confidence, min_items, pos) {
 
+      if (confirm('Are you sure that this item is wrong and you want to remove it?')) {
+
       elem = el;
       fof = elem.parentNode.parentNode;
       fof.style.display = "none";
@@ -303,8 +305,8 @@
                 //alert(data)
             }
         });
-      }
-
+      } // end if
+    }
     </script>
 
     </div> <!-- # close grey -->
