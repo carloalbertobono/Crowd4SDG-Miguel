@@ -8,20 +8,21 @@
 
 <div class="content">
 
-    <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+    <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; padding: 2px;">
         <div><span>
-          <img src="/static/images/Crowd4SDG.png" style="height: 75px;flex-basis: 10%;">
+          <img src="/static/images/Crowd4SDG.png" style="height: 70px;flex-basis: 10%;">
         </span></div>
 
         <div><span>
-          <img src="/static/images/Logo_polimi.png" style="height: 35px;flex-basis: 20%;">
+          <img src="/static/images/Logo_polimi.png" style="height: 30px;flex-basis: 20%;">
         </span></div>
     </div>
 
     <div style="background-color: rgb(211,211,211); position: relative;z-index: 0;opacity:0.999">
 
     <h1 class= "logo" style="color: black;">
-        <img src="/static/images/VisualCit.png" style="height: 60px;">   
+        <img src="/static/images/VisualCit.png" style="height: 75px;">
         Pipeline Interface 
     </h1>
     <br style="line-height: 5px" />
@@ -67,6 +68,12 @@
                     -->
                 {% endfor %}
             </div>
+            <div id="demobox", class="center">
+            Scroll list &#160; <font size="+3"> &#10153; </font>
+            </div>
+            <div class="disabledBackgroundContainer" id="disabledBackgroundContainer{{(1)}}">
+                <progress id="progressBar{{1}}"></progress>
+            </div> <!-- {{1}}, {{ tweets[0]|length }}  -->
         {% endif %}
         {% endif %}
         <br style="line-height: 5px" />
@@ -81,7 +88,7 @@
         </div><br style="line-height: 5px" /><br style="line-height: 5px" />
         {% endfor %}
 
-    </div> 
+    </div>
     <div class="filters">
         {% if count>0 %}
         {% for x in range(count) %}
@@ -230,6 +237,20 @@
                 {% endfor %}
 
             </div>
+            <div style="width:900px;">
+                <div style="width:600px; float: right;">
+                    <p> Suggested Keywords for your Query </p>
+                </div>
+                <div id="cloudbox", class="center", style="width:600px; float:right;">
+                    <ul class="cloud" role="navigation" aria-label="Webdev tag cloud">
+                        {% for u in range(keys[x]| length) %}
+                            <li><a data-weight={{ 9 - u }}> {{ keys[x][u] }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div style="clear: both;"></div>
+
             {% endif %}
 
             {# % if hasmap and count == x+2 % #}
@@ -360,10 +381,10 @@ window.onclick = function(event) {
 </script>
 
 <!--footer class="bg-light small px-3 py-3 mt-auto" id="footer"-->
-<footer class="footer2">
+<footer class="footer2", style="height: 30px">
         <div class="container-fluid">
             <div class="float-right">
-                VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark Carman, Barbara Pernici, Jacopo Frasson, and others...
+                VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark Carman, Barbara Pernici, Jacopo Frasson, Angelica Sofia Valeriani and others...
             </div>
         </div>
 </footer>

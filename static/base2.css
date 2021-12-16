@@ -1,0 +1,79 @@
+#demobox {
+  top: 100px;
+  right: 0;
+  background-color: whitesmoke ;
+  padding: 0px 0;
+  border: 1px solid gray ;
+  margin: 0px;
+}
+
+#cloudbox {
+  top: 100px;
+  background-color: white ;
+  padding: 0px 0;
+  border: 1px solid gray ;
+  margin: 0px;
+  width: 100%;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+ul.cloud {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  line-height: 2.5rem;
+}
+
+ul.cloud a {
+  color: #a33;
+  display: block;
+  padding: 0.125rem 0.25rem;
+  --size: 4;
+  font-size: calc(var(--size) * 0.25rem + 0.5rem);
+  text-decoration: none;
+  position: relative;
+}
+
+ul.cloud a[data-weight="1"] { --size: 1; color: #343a40}
+ul.cloud a[data-weight="2"] { --size: 2; color: slategrey}
+ul.cloud a[data-weight="3"] { --size: 3; color: indigo}
+ul.cloud a[data-weight="4"] { --size: 4; color: darkblue}
+ul.cloud a[data-weight="5"] { --size: 5; color: slategrey}
+ul.cloud a[data-weight="6"] { --size: 6; color: indigo}
+ul.cloud a[data-weight="7"] { --size: 7; color: #343a40}
+ul.cloud a[data-weight="8"] { --size: 8; color: teal}
+ul.cloud a[data-weight="9"] { --size: 9; color: maroon}
+
+p {
+  margin: 2px;
+  text-align: center;
+  font-size: x-large;
+  background-color: whitesmoke;
+  border: 1px solid gray ;
+  padding: 10px;
+}
+
+body {
+  font-size: 80%;
+}
+
+.container {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}

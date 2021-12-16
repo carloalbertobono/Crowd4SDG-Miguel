@@ -14,6 +14,8 @@ import folium
 from folium.plugins import MarkerCluster
 import json
 import numpy as np
+import re
+from collections import Counter
 
 import sqlite3
 con = sqlite3.connect('annotations.db', check_same_thread = False)
@@ -30,7 +32,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
 
-address = test
+address = server #test
 
 #<!--img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text + "\n\nUser location: " + tweets[0][u].user_country + "\n\nTweet location: " + tweets[0][u].tweet_location}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/-->
 #<!--img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text + "\n\nUser location: " + tweets[x+1][u].user_country + "\n\nTweet location: " + tweets[x+1][u].tweet_location }}' style="display: inline-block;" loading="lazy"/ -->
@@ -96,6 +98,7 @@ def get_session_data(session):
     get_or_setandget(mystuff, 'source_applied', [{'ID': "", 'source': "", 'keywords': ""}]),
     get_or_setandget(mystuff, 'number_images', 100),
     get_or_setandget(mystuff, 'tweets', []),
+    get_or_setandget(mystuff, 'keywords', []),
     get_or_setandget(mystuff, 'csv_contents', []),
     get_or_setandget(mystuff, 'confidence', 90),
     get_or_setandget(mystuff, 'confidence_', 0.9),
@@ -127,7 +130,7 @@ def index():
         ga = request.cookies.get("_ga")
 
     # Init all variables at user session level (not globals)
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(session)
+    count, applied, source_applied, number_images, tweets, keys, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(session)
     
     print(applied)
     print(source_applied)
@@ -152,6 +155,7 @@ def index():
             csv_contents = []
             locations = []
             alert = ""
+            keys = []
 
             if count == 0:
                 print("Crawling at count 0")
@@ -200,6 +204,18 @@ def index():
 
 
                     tweets.append(u)
+                    # TODO Angelica Modification
+                    contents = []
+                    tweets_text = df['full_text'].tolist()
+                    for t in tweets_text:
+                        hashtags = re.findall("#([a-zA-Z0-9_]{1,50})", t)
+                        contents = contents + hashtags
+                    mapping = Counter(contents).most_common(10)
+                    kss = []
+                    for i in mapping:
+                        kss.append(i[0])
+                    keys.append(kss)
+                    # TODO Angelica Modification
                     if 'user_country' in df:
                         df_sorted = df.sort_values(by=['user_country'], ascending = True)
                         locations.append(df_sorted['user_country'].astype(str).unique().tolist())
@@ -355,6 +371,18 @@ def index():
                         tweets.append(u)
                         count+=1
                         alert = ""
+                        # TODO Angelica Modification
+                        contents = []
+                        tweets_text = df['full_text'].tolist()
+                        for t in tweets_text:
+                            hashtags = re.findall("#([a-zA-Z0-9_]{1,50})", t)
+                            contents = contents + hashtags
+                        mapping = Counter(contents).most_common(10)
+                        kss = []
+                        for i in mapping:
+                            kss.append(i[0])
+                        keys.append(kss)
+                        # TODO Angelica Modification
                     else:
                         alert = "After running the above filter, no images remain. Either increase the number of images or change the filter. (1)"
                         
@@ -382,6 +410,18 @@ def index():
                     csv_contents.append(csv_string)
                     count+=1
                     alert = ""
+                    # TODO Angelica Modification
+                    contents = []
+                    tweets_text = df['full_text'].tolist()
+                    for t in tweets_text:
+                        hashtags = re.findall("#([a-zA-Z0-9_]{1,50})", t)
+                        contents = contents + hashtags
+                    mapping = Counter(contents).most_common(10)
+                    kss = []
+                    for i in mapping:
+                        kss.append(i[0])
+                    keys.append(kss)
+                    # TODO Angelica Modification
                     
                 #else:
                 #    flash('Select an option')
@@ -585,7 +625,7 @@ def index():
         track_event(cid=ga, type = 'event', category = ga_event, action = 'test', label = 'test', value=1)
 
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
-                           applied=applied, alert=alert, locations=locations,
+                           keys=keys, applied=applied, alert=alert, locations=locations,
                            number_images=number_images, confidence=confidence, hasmap=hasmap, mapdata=mapdata,
                            moreparams=moreparams, firsttime=firsttime, hasuserloc=hasuserloc)
 
@@ -595,7 +635,7 @@ def downloadCSV():
     #print("int(request.args.get('id')): ", int(request.args.get('id')))
     #print("csv_contents:\n\n", csv_contents)
 
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, keys, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     return Response(
@@ -611,7 +651,7 @@ def annotate():
     print(myjson)
 
     # Recover data (we need to modify inputs!)
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, keys, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     # Remove item
@@ -672,7 +712,7 @@ def check_user_loc(csv_contents):
 
 @app.route('/map', methods=['GET','POST'])
 def map(small=False):
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, keys, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     hasmap, df = checkmap(csv_contents)
@@ -721,7 +761,7 @@ from flask import jsonify
 import copy
 @app.route('/batch', methods=['GET','POST'])
 def batch():
-    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
+    count, applied, source_applied, number_images, tweets, keys, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
     j = {'url': f'http://{address}/Crawler/API/CrawlAndFilter',
