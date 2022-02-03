@@ -85,7 +85,7 @@
     <div class="filters">
         {% if count>0 %}
         {% for x in range(count) %}
-        <form method="POST" id={{"poster"~(x+1)}}>
+        <form method="POST" id="{{"poster"~(x+1)}}">
             <!--button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;display:none;"></i></button-->
             <select id={{"Filter"~(x+1)}} name="Filter_select" required>
                 <option value="">-Select-</option>
@@ -216,7 +216,8 @@
             {# % if not hasmap or count != x+2 % #}
             {% if not hasmap or applied[x].Filter != post_location_tag %}
 
-            <div class="container">
+            <div class="container" {% if x+2 == count %}id="last_container"{% endif %}>
+
                 {% for u in range(number) %}
                 <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[x+1][u].id)}}' {% endif %} target='_blank'>
                 <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
