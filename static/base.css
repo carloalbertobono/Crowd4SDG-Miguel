@@ -36,6 +36,18 @@ a img {
   border: none;
 }
 
+img {
+    width: 100px;
+}
+img.selected {
+    border: 1px solid red;
+    opacity: 0.3;
+    filter: alpha(opacity=30); /* msie */
+}
+img:hover {
+    cursor: not-allowed;
+}
+
 sup, sub {
   line-height: 0;
 }

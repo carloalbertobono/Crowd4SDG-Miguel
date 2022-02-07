@@ -24,7 +24,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 server = '131.175.120.2:7779'
 test = '127.0.0.1:8000'
 
-address = test
+address = server
 
 #<!--img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text + "\n\nUser location: " + tweets[0][u].user_country + "\n\nTweet location: " + tweets[0][u].tweet_location}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/-->
 #<!--img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text + "\n\nUser location: " + tweets[x+1][u].user_country + "\n\nTweet location: " + tweets[x+1][u].tweet_location }}' style="display: inline-block;" loading="lazy"/ -->

@@ -5,6 +5,7 @@
 {% block content %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src='//js.zapjs.com/js/download.js'></script>
 
 <div class="content">
 
@@ -219,9 +220,25 @@
             <div class="container" {% if x+2 == count %}id="last_container"{% endif %}>
 
                 {% for u in range(number) %}
+
+                <div class="image">
+
                 <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[x+1][u].id)}}' {% endif %} target='_blank'>
-                <img src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
+
+                    <div class="overlay">
+                     <label class="switch">
+                      <input checked type="checkbox">
+                      <span class="slider round"></span>
+                    </label>
+                    </div>
+
+                    <img class="imgrower" src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
                 </a>
+
+
+              </div>
+
+
                 {% endfor %}
 
             </div>
@@ -239,11 +256,13 @@
         {% endfor %}
 
         {% endif %}
+
         <br style="line-height: 5px" />
-        <div class= "download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
+        <div class="download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
             <form method= "POST">
             {% if count > x+1 %}
             <label2><font size="2">{{ tweets[x+1]|length }} items returned</font></label2>&nbsp;&nbsp;&nbsp;
+            <!-- manual annotations console -->
             <a href={{"/downloadCSV?id="~(x+1)}}>
                 <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
             </a>
@@ -255,7 +274,18 @@
 
             {% endif %}
             </form>
+
+            {% if x+2 == count %}
+            <br style="line-height: 5px" />
+            <div id="anno_downloader" style="float: right; font-family: Arial, Helvetica, sans-serif; display: none">
+                <label2><font size="2">Annotations</font></label2>&nbsp;&nbsp;&nbsp;
+                <button id="check" style= "float: right;">Get</button>
+                <button id="reset" style= "float: right;">Reset</button>
+            </div>
+            {% endif %}
+
         </div>
+
 
         <br style="line-height: 5px" />
         <br style="line-height: 5px" />
@@ -325,6 +355,114 @@ window.onclick = function(event) {
     video.currentTime = 0;
   }
 }
+
+</script>
+
+
+
+<!-- image selectors -->
+<script>
+
+// https://www.w3schools.com/howto/howto_css_switch.asp
+// https://stackoverflow.com/questions/54069360/how-to-place-button-on-top-right-corner-of-image
+
+$(function () {
+		$("#last_container > div").hover(function () {
+
+        var over = $(this).find('.overlay')
+
+        if (over.css("display") != "inline-block") {
+        		over.css("display", "inline-block");
+        }
+
+        //console.log("in");
+    },
+    function () {
+
+        var inpu = $(this).find('input')
+
+        // not unchecked
+        if (inpu.prop("checked") == true) {
+        		var over = $(this).find('.overlay')
+        		over.css("display", "none");
+        }
+
+        //console.log("out");
+    }
+    );
+
+
+    $("#last_container > div > a > div > label > input").click(function () {
+
+        var img = $(this).closest('a').find('img')
+        $(img).toggleClass("selected");
+
+        // each time we click, we show the buttons
+        $(document.getElementById("anno_downloader")).css({"display":"inline-block"})
+
+        if($(this).hasClass("selected")) {
+        //console.log("slider clicker off");
+        }
+        else {
+        //console.log("slider clicker on");
+        }
+
+
+    });
+    $("#reset").click(function () {
+        $("input").val("");
+        $("img.selected").removeClass("selected");
+        $("input").prop("checked", "false");
+        $("div.overlay").css({"display":"none"});
+        $(document.getElementById("anno_downloader")).css({"display":"none"})
+
+    });
+
+    $("#check").click(function () {
+
+        var first_selected = -1;
+            var last_selected = -1;
+            var tmpp;
+
+         var imgs = document.getElementById("last_container").getElementsByTagName('img');
+
+         //traverse to check annotation boundaries
+         for (i = 0; i < imgs.length; i++) {
+
+            tmpp = imgs[i].classList.contains('selected');
+            if (tmpp == true) {
+              if (first_selected < 0) { first_selected = i;}
+              last_selected = i;
+            }
+
+
+         }
+
+         // extract annotated items (need to invert the boolean)
+         var rows = [];
+         for (i = first_selected; i <= last_selected; i++) {
+            console.log(i, imgs[i].classList.contains('selected') , imgs[i].src);
+            var mybol = imgs[i].classList.contains('selected')
+            rows.push([imgs[i].src, !mybol])
+
+         }
+            // Building the CSV from the Data two-dimensional array
+            // Each column is separated by ";" and new line "\n" for next row
+            var csvContent = '';
+            rows.forEach(function(infoArray, index) {
+              dataString = infoArray.join(';');
+              csvContent += index < rows.length ? dataString + '\n' : dataString;
+            });
+
+            console.log(csvContent);
+
+            download(csvContent, "annotations.csv", "text/plain");
+
+         //console.log(first_selected, last_selected)
+
+    });
+
+});
 
 </script>
 
