@@ -8,7 +8,7 @@ In order to run this interface:
    - conda create -n VIRTUAL python=3.8.10
    - conda activate VIRTUAL
 
-- Install these two required packages (this step needs only to be done once):
+- Install the required packages (this step needs only to be done once):
    - pip install pandas
    - pip install flask
    - pip install Flask-Session
