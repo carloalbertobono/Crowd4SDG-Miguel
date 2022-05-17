@@ -723,7 +723,7 @@ def batch():
         config['name'] = f['Attribute']
         del config['Attribute']
         del config['ID']
-        config['confidence'] = config['Confidence']
+        config['confidence'] = "{:.2f}".format(float(config['Confidence'])/100)
         del config['Confidence']
         del config['Filter']
 
