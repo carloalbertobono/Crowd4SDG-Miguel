@@ -201,7 +201,6 @@ def index():
                     count+=1
                     alert = ""
 
-
                 else:
                     alert = "Your search query did not return any images. Please try to either shorten the query or make use of the OR keyword to make some of the terms optional. Also refer to the <a href=\"https://developer.twitter.com/en/docs/twitter-api/v1/rules-and-filtering/search-operators\">Twitter user guide</a>"
 
@@ -607,8 +606,16 @@ def downloadCSV():
     count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
         session)
 
+    # rename "media_url" in "info_media_url"
+    df_ = csv_contents[int(request.args.get('id'))]
+    tmp = StringIO(df_)
+    df_ = pd.read_csv(tmp)
+    df_ = df_.rename(columns={"media_url": "info_media_url"}, errors='ignore')
+    res = df_.to_csv(encoding="utf-8")
+
     return Response(
-        csv_contents[int(request.args.get('id'))],
+        # csv_contents[int(request.args.get('id'))],
+        res,
         mimetype="text/csv",
         headers={"Content-disposition":
                  "attachment; filename=download.csv"})
@@ -652,6 +659,13 @@ def map(small=False):
     df['CIME_list'] = df['CIME_geolocation_centre'].replace('None', np.nan).fillna('[]').apply(json.loads)
     # get first
     df['CIME_first'] = df['CIME_list'].apply(lambda l: [l[0][1], l[0][0]] if l else None)
+    # OR explode?
+    # keep = df.columns.to_list()
+    # keep.remove('CIME_geolocation_centre')
+    # keep.remove('CIME_geolocation_string')
+    # keep.remove('CIME_geolocation_osm')
+    # df = df.set_index(keep).apply(pd.Series.explode).reset_index()
+
     # get valid
     dfout = df[~df['CIME_first'].isnull()]
     # to records
