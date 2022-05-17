@@ -599,6 +599,7 @@ def index():
 
 @app.route("/downloadCSV")
 def downloadCSV():
+
     #print("length of csv_contents: ", len(csv_contents))
     #print("int(request.args.get('id')): ", int(request.args.get('id')))
     #print("csv_contents:\n\n", csv_contents)
