@@ -644,6 +644,11 @@ def downloadCSVs():
     df_ = df_.drop(columns=['CIME_geolocation_centre',
                             'CIME_geolocation_string',
                             'CIME_geolocation_osm'], errors='ignore')
+    # Cosmetics for RCIS 22
+    df_.rename(columns={"info_media_url": "url"})
+    import ast
+    df_['CIME_geolocation_centre_first'] = df_['CIME_geolocation_centre_first'].apply(lambda x: ast.literal_eval(x)).apply(lambda x: str(x[0]) + ',' + str(x[1]))
+
     res = df_.to_csv(encoding="utf-8", index=None)
 
     return Response(
