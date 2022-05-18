@@ -195,7 +195,7 @@ def index():
                     if 'user_country' in df:
                         df_sorted = df.sort_values(by=['user_country'], ascending = True)
                         locations.append(df_sorted['user_country'].astype(str).unique().tolist())
-                    csv_string = df.to_csv(encoding= "utf-8")                    
+                    csv_string = df.to_csv(encoding= "utf-8", index=None)
                     #csv_contents.append(url_csv_get.text)
                     csv_contents.append(csv_string)
                     count+=1
@@ -248,7 +248,7 @@ def index():
 
                     df_sorted = df.sort_values(by=['user_country'], ascending = True)
                     locations[0] = df_sorted['user_country'].astype(str).unique().tolist()
-                    csv_string = df.to_csv(encoding= "utf-8")
+                    csv_string = df.to_csv(encoding= "utf-8", index=None)
                     #csv_contents[0]= url_csv_get.text
                     csv_contents[0]= csv_string
                     alert = ""
@@ -368,7 +368,7 @@ def index():
                         p = {"url": df['media_url'].iloc[x], "text": df['full_text'].iloc[x], "user_country": df['user_country'].iloc[x], "tweet_location": df['CIME_geolocation_string'].iloc[x], "id": df['id'].iloc[x]}
                         u.append(p)
                     tweets.append(u)                     
-                    csv_string = df.to_csv(encoding= "utf-8")
+                    csv_string = df.to_csv(encoding= "utf-8", index=None)
                     csv_contents.append(csv_string)
                     count+=1
                     alert = ""
@@ -558,7 +558,7 @@ def index():
                     df = df0.loc[df0['user_country'] == applied[sel_count-2+a]['Attribute']]
                     failsafe(df)
 
-                    csv_string = df.to_csv(encoding= "utf-8")
+                    csv_string = df.to_csv(encoding= "utf-8", index=None)
                     print("The length is", len(csv_string))
                     if len(csv_string) > 160:
                         print("location: ", applied)
@@ -612,7 +612,12 @@ def downloadCSV():
     tmp = StringIO(df_)
     df_ = pd.read_csv(tmp)
     df_ = df_.rename(columns={"media_url": "info_media_url"}, errors='ignore')
-    res = df_.to_csv(encoding="utf-8")
+
+    if 'CIME_geolocation_centre_first' in df_:
+        df_ = df_.drop(columns=['CIME_geolocation_centre_first',
+                                'CIME_geolocation_string_first',
+                                'CIME_geolocation_osm_first'], errors='ignore')
+    res = df_.to_csv(encoding="utf-8", index=None)
 
     return Response(
         # csv_contents[int(request.args.get('id'))],
@@ -620,6 +625,34 @@ def downloadCSV():
         mimetype="text/csv",
         headers={"Content-disposition":
                  "attachment; filename=download.csv"})
+
+@app.route("/downloadCSVs")
+def downloadCSVs():
+
+    #print("length of csv_contents: ", len(csv_contents))
+    #print("int(request.args.get('id')): ", int(request.args.get('id')))
+    #print("csv_contents:\n\n", csv_contents)
+
+    count, applied, source_applied, number_images, tweets, csv_contents, confidence, confidence_, alert, locations, uuid, firsttime, mystuff = get_session_data(
+        session)
+
+    # rename "media_url" in "info_media_url"
+    df_ = csv_contents[int(request.args.get('id'))]
+    tmp = StringIO(df_)
+    df_ = pd.read_csv(tmp)
+    df_ = df_.rename(columns={"media_url": "info_media_url"}, errors='ignore')
+    df_ = df_.drop(columns=['CIME_geolocation_centre',
+                            'CIME_geolocation_string',
+                            'CIME_geolocation_osm'], errors='ignore')
+    res = df_.to_csv(encoding="utf-8", index=None)
+
+    return Response(
+        # csv_contents[int(request.args.get('id'))],
+        res,
+        mimetype="text/csv",
+        headers={"Content-disposition":
+                 "attachment; filename=download.csv"})
+
 
 def checkmap(csv_contents):
     lastid = len(csv_contents) - 1 # only last id
@@ -657,9 +690,10 @@ def map(small=False):
         return "Not initialized"
 
     # parse json
-    df['CIME_list'] = df['CIME_geolocation_centre'].replace('None', np.nan).fillna('[]').apply(json.loads)
+    cimelist = df['CIME_geolocation_centre'].replace('None', np.nan).fillna('[]').apply(json.loads)
     # get first
-    df['CIME_first'] = df['CIME_list'].apply(lambda l: [l[0][1], l[0][0]] if l else None)
+    df['CIME_geolocation_centre_first'] = cimelist.apply(lambda l: [l[0][1], l[0][0]] if l else None)
+
     # OR explode?
     # keep = df.columns.to_list()
     # keep.remove('CIME_geolocation_centre')
@@ -668,9 +702,21 @@ def map(small=False):
     # df = df.set_index(keep).apply(pd.Series.explode).reset_index()
 
     # get valid
-    dfout = df[~df['CIME_first'].isnull()]
+    dfout = df[~df['CIME_geolocation_centre_first'].isnull()]
+
+    # other fields
+    import ast
+    dfout.CIME_geolocation_osm = dfout.CIME_geolocation_osm.apply(lambda x: ast.literal_eval(x))
+    dfout.CIME_geolocation_string = dfout.CIME_geolocation_string.apply(lambda x: ast.literal_eval(x))
+    dfout['CIME_geolocation_osm_first'] = dfout['CIME_geolocation_osm'].apply(lambda x: x[0])
+    dfout['CIME_geolocation_string_first'] = dfout['CIME_geolocation_string'].apply(lambda x: x[0])
+
+    # stuff it back
+    lastid = len(csv_contents) - 1
+    csv_contents[lastid] = dfout.to_csv(encoding="utf-8", index=None)
+
     # to records
-    records = dfout[['full_text', 'media_url', 'CIME_first']].to_dict('records')
+    records = dfout[['full_text', 'media_url', 'CIME_geolocation_centre_first']].to_dict('records')
 
     if small:
         f = folium.Figure(width='50%')
@@ -685,7 +731,7 @@ def map(small=False):
 
     for r in records:
         ma = folium.Marker(
-            location=r['CIME_first'],
+            location=r['CIME_geolocation_centre_first'],
             popup='<p>' + r['full_text'] + '</p>' + '<img src="' + r['media_url'] + '" height=100>',
             icon=folium.Icon(color="red", icon="info-sign"),
         )

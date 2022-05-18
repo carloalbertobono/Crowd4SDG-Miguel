@@ -291,9 +291,13 @@
                 <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
             </a>
                 {% if hasmap and applied[x].Filter == post_location_tag %}
+                <a href={{"/downloadCSVs?id="~(x+1)}}>
+                <button id= {{"download_csv_s"~(x+1)}} type= "button" name= "download_csv_s" value= {{x+1}} style= "float: right;">Download CSV File (single pos)</button>
+                </a>
                 <a href="/map" target="_blank">
                     <button id= "mymap" type="button"   name="mymap" value= "0" style= "float: right;">Show fullscreen map</button>
                 </a>
+
                 {% endif %}
 
             {% endif %}
