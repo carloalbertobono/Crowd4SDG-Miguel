@@ -617,6 +617,8 @@ def downloadCSV():
         df_ = df_.drop(columns=['CIME_geolocation_centre_first',
                                 'CIME_geolocation_string_first',
                                 'CIME_geolocation_osm_first'], errors='ignore')
+
+    df_ = df_.fillna('-').replace(r'^\s*$', '-', regex=True)
     res = df_.to_csv(encoding="utf-8", index=None)
 
     return Response(
@@ -649,6 +651,7 @@ def downloadCSVs():
     import ast
     df_['CIME_geolocation_centre_first'] = df_['CIME_geolocation_centre_first'].apply(lambda x: ast.literal_eval(x)).apply(lambda x: str(x[0]) + ',' + str(x[1]))
 
+    df_ = df_.fillna('-').replace(r'^\s*$', '-', regex=True)
     res = df_.to_csv(encoding="utf-8", index=None)
 
     return Response(
