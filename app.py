@@ -643,13 +643,19 @@ def downloadCSVs():
     tmp = StringIO(df_)
     df_ = pd.read_csv(tmp)
     df_ = df_.rename(columns={"media_url": "info_media_url"}, errors='ignore')
-    df_ = df_.drop(columns=['CIME_geolocation_centre',
-                            'CIME_geolocation_string',
-                            'CIME_geolocation_osm'], errors='ignore')
+
     # Cosmetics for RCIS 22
     df_ = df_.rename(columns={"info_media_url": "url"})
     import ast
-    df_['CIME_geolocation_centre_first'] = df_['CIME_geolocation_centre_first'].apply(lambda x: ast.literal_eval(x)).apply(lambda x: str(x[0]) + ',' + str(x[1]))
+    # df_['CIME_geolocation_centre_first'] = df_['CIME_geolocation_centre_first'].apply(lambda x: ast.literal_eval(x)).apply(lambda x: str(x[0]) + ',' + str(x[1]))
+    df_['gpe_lat'] = df_['CIME_geolocation_centre_first'].apply(lambda x: ast.literal_eval(x)).apply(lambda x: str(x[0]))
+    df_['gpe_lon'] = df_['CIME_geolocation_centre_first'].apply(lambda x: ast.literal_eval(x)).apply(lambda x: str(x[1]))
+    df_ = df_.rename(columns={"CIME_geolocation_string_first": "gpe"}, errors='ignore')
+
+    df_ = df_.drop(columns=['CIME_geolocation_centre',
+                            'CIME_geolocation_string',
+                            'CIME_geolocation_osm',
+                            'CIME_geolocation_centre_first'], errors='ignore')
 
     df_ = df_.fillna('-').replace(r'^\s*$', '-', regex=True)
     res = df_.to_csv(encoding="utf-8", index=None)
