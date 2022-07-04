@@ -347,9 +347,10 @@
     <span id="close2_" class="close">&times;</span>
       <!-- YT embed -->
        <!--iframe width="560" height="315" src="https://www.youtube.com/embed/ZIaayJYDC9w" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe-->
-       <video controls playsinline id="myvideo" src="{% if firsttime %}/static/video/visualcit_demo_sound.mkv{% else %}none{% endif %}" controls="yourControls" autoplay="false">
-        Your browser doesn't support the `<video>` tag. /*this is a fallback*/
-        </video>
+       <!--<video controls playsinline id="myvideo" src="{% if firsttime %}/static/video/visualcit_demo_sound.mkv{% else %}none{% endif %}" controls="yourControls" autoplay="false">-->
+      <video controls playsinline id="myvideo" src="/static/video/visualcit_demo_sound.mkv" controls="yourControls">
+      Your browser doesn't support the `<video>` tag. /*this is a fallback*/
+      </video>
   </div>
 
 </div>
@@ -381,6 +382,13 @@ window.onclick = function(event) {
     modal.style.display = "none";
     video.pause();
     video.currentTime = 0;
+  }
+}
+
+// When the user clicks on the info button, show the modal
+function myVideoTrigger() {
+  if (modal.style.display === "none") {
+    modal.style.display = "block";
   }
 }
 
@@ -499,6 +507,7 @@ $(function () {
         <div class="container-fluid">
             <div class="float-right">
                 VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark Carman, Barbara Pernici, Jacopo Frasson, and others...
+            <button onclick="myVideoTrigger()" id="video_trigger" class="astext">&#9432;</button>
             </div>
         </div>
 </footer>
