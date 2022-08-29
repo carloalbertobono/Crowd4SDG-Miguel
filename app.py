@@ -590,7 +590,9 @@ def index():
 
     # Tracking
     if ga:
-        track_event(ga)
+        pass
+        # disabled upon DEIB request
+        # track_event(ga)
 
     return render_template('index.html', count=count, source_applied=source_applied, tweets=tweets,
                            applied=applied, alert=alert, locations=locations,
