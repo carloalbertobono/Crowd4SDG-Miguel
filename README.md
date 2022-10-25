@@ -23,5 +23,5 @@ In order to run this interface:
 
 In order to use this interface:
 - Select a source, introduce the keywords and set the number of images to be shown (default = 100)
-- Select a filter to apply or click on download to get the filtered images in a csv.
-- Reset to clean the interface and associated data.
+- Select a filter to apply or click on download to get the filtered images in a csv
+- Reset to clean the interface and associated data
