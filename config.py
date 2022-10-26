@@ -13,5 +13,6 @@ d['post_location_tag'] = "Show post locations on a map"
 d['user_location_tag'] = "Add author locations"
 d['user_location_sel_tag'] = "Select authors from:"
 
+
 def get_tags():
     return d

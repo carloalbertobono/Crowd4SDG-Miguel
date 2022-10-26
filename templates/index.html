@@ -3,598 +3,1071 @@
 {% block title %}Crows4SDG VisualCit Pipeline Interface{% endblock %}
 
 {% block content %}
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<!--script src='//js.zapjs.com/js/download.js'></script-->
-<script>
-    function download(text, filename, type="text/plain") {
-  // Create an invisible A element
-  const a = document.createElement("a");
-  a.style.display = "none";
-  document.body.appendChild(a);
-
-  // Set the HREF to a Blob representation of the data to be downloaded
-  a.href = window.URL.createObjectURL(
-    new Blob([text], { type })
-  );
-
-  // Use download attribute to set set desired file name
-  a.setAttribute("download", filename);
-
-  // Trigger the download by simulating click
-  a.click();
-
-  // Cleanup
-  window.URL.revokeObjectURL(a.href);
-  document.body.removeChild(a);
-}
-</script>
-
-
-<div class="content">
-
-    <div class="banner_box vertical-center" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;">
-        <div><span>
-          <img src="/static/images/Crowd4SDG.png" style="height: 75px;flex-basis: 10%;">
-        </span></div>
-
-        <div><span>
-          <img src="/static/images/Logo_polimi.png" style="height: 35px;flex-basis: 20%;">
-        </span></div>
-    </div>
-
-    <div style="background-color: rgb(211,211,211); position: relative;z-index: 0;opacity:0.999">
-
-    <h1 class= "logo" style="color: black;">
-        <img src="/static/images/VisualCit.png" style="height: 60px;">   
-        Pipeline Interface 
-    </h1>
-    <br style="line-height: 5px" />
-
-
-
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-
-
-    <div class= "source">
-        <form method="POST">
-            <select id="source" name="source">
-                <option value="Twitter"{% if source_applied[0].source == "Twitter" %}selected{%endif%}>Twitter</option>
-                <option value="Flickr"{% if source_applied[0].source == "Flickr" %}selected{%endif%}>Flickr</option>
-               <!-- 
-                <option value="Flickr"{% if source_applied[0].source == "Flickr" %}selected{%endif%}>Flickr</option>
-                <option value="Reddit"{% if source_applied[0].source == "Reddit" %}selected{%endif%}>Reddit</option> -->
-            </select>
-            <input id="keywords" name="keywords" type="text" {% if count > 0 %} value= '{{source_applied[0].keywords}}' {% endif %} placeholder= "Search keywords" required>
-            <label for="number_pic" style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif;">Number of images:</label>
-            <input id="number_pic" name="number_pic" {% if count == 0%} value= 100 {% else %} value= {{number_images}} {% endif %} type="number" min="100" max="1000" step="100" style="width: 50px;">
-            <button id="source_button" type="submit" class="source_button" name="source_button" value="">Search</button> 
-            <button id="loading" name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button> <br style="line-height: 5px" /><br style="line-height: 5px" />
-        </form>
-        {% if tweets[0]|length < number_images|int %}
-            {% set number= tweets[0]|length %}
-        {% else %}
-            {% set number= number_images|int %}
-        {% endif %}
-        {% for s in source_applied %}
-        {% if s.source != "" %}
-        {% if s.source == 'Twitter' or s.source == 'Flickr' %}
-            <div class="container">
-                {% for u in range(number) %}
-                    <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[0][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[0][u].id)}}' {% endif %} target='_blank'>
-                    <img src= {{ tweets[0][u].url }} height=100 title= '{{tweets[0][u].text}}' style="display: inline-block;" loading="lazy" onerror="this.style.display='none'"/>
-                    </a>
-                    <!--
-                    <div class= "overlay">
-                        <div class= "text"> {{tweets[0][u].text}}</div>
-                    </div>
-                    -->
-                {% endfor %}
-            </div>
-        {% endif %}
-        {% endif %}
-        <br style="line-height: 5px" />
-        <div class= "download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
-            {% if count > 0 %}
-            <label2><font size="2">{{ tweets[0]|length }} items returned</font></label2>&nbsp;&nbsp;&nbsp;
-            <a href="/downloadCSV?id=0">
-                <button id= "download_csv" type="button" name="download_csv" value= "0" style= "float: right;">Download CSV File</button>
+    <nav class="navbar bg-white shadow px-4 py-3">
+        <div class="container-fluid align-items-center justify-content-center gap-4">
+            <a href="https://crowd4sdg.eu/" target="_blank">
+                <img src="/static/images/Crowd4SDG.png" style="width: 14.5rem;">
             </a>
-            {% endif %}
+            <a href="/" class="text-decoration-none mx-auto">
+                <h1 class="logo">
+                    <img src="/static/images/VisualCit.png" style="width: 8.5rem;">
+                    Pipeline Builder
+                </h1>
+            </a>
+            <a href="https://polimi.it/" target="_blank">
+                <img src="/static/images/Logo_polimi.png" style="width: 14.5rem;">
+            </a>
+        </div>
+    </nav>
 
-        </div><br style="line-height: 5px" /><br style="line-height: 5px" />
-        {% endfor %}
-
-    </div> 
-    <div class="filters">
-        {% if count>0 %}
-        {% for x in range(count) %}
-        <form method="POST" id="{{"poster"~(x+1)}}">
-            <!--button type="submit" id={{"up_button"~(x+1)}} class= "btn" name= "up_button" value= {{x+1}} {% if count > x+1 and x > 0 %} style="display:inline;" {% else %} style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;display:none;"></i></button-->
-            <select id={{"Filter"~(x+1)}} name="Filter_select" required>
-                <option value="">-Select-</option>
-                <optgroup label="Preprocessing">
-                  <option value="{{ duplicates_tag }}" {% if applied[x].Filter == duplicates_tag %} selected {% endif %}>{{ duplicates_tag }}</option>
-                  <option value="{{ nsfw_tag }}" {% if applied[x].Filter == nsfw_tag %} selected {% endif %}>{{ nsfw_tag }}</option>
-                  <option value="{{ meme }}" {% if applied[x].Filter == meme %} selected {% endif %}>{{ meme }}</option>
-                </optgroup>
-                <optgroup label="Selection">
-                  <option value="{{ person_tag }}" {% if applied[x].Filter == person_tag %} selected {% endif %}>{{ person_tag }}</option>
-                  <option value="{{ object_tag }}" {% if applied[x].Filter == object_tag %} selected {% endif %}>{{ object_tag }}</option>
-                  <option value="{{ scene_tag }}" {% if applied[x].Filter == scene_tag %} selected {% endif %}>{{ scene_tag }}</option>
-                  <!--option value="{{ object_tag_detr }}" {% if applied[x].Filter == object_tag_detr %} selected {% endif %}>{{ object_tag_detr }}</option-->
-                  <option value="{{ flood_tag }}" {% if applied[x].Filter == flood_tag %} selected {% endif %}>{{ flood_tag }}</option>
-
-                </optgroup>
-                {% if source_applied[0].source == 'Twitter' %}
-                <optgroup label="Location">
-                  <option value="{{ post_location_tag }}" {% if applied[x].Filter == post_location_tag %} selected {% endif %}>{{ post_location_tag }}</option>
-                  <option value="{{ user_location_tag }}" {% if applied[x].Filter == user_location_tag %} selected {% endif %}>{{ user_location_tag }}</option>
-                  {% if hasuserloc %}
-                    <option value="{{ user_location_sel_tag }}" {% if applied[x].Filter == user_location_sel_tag %} selected {% endif %}>{{ user_location_sel_tag }}</option>
-                  {% endif %}
-                </optgroup>
+    <main class="content pt-5"
+          style="background-color:#fff;background-image:url('/static/images/bg-pattern.png');background-repeat:repeat;background-size:65px;min-height:calc(100vh - 200px);">
+        <div style="position: relative;z-index: 0;">
+            <div class="source">
+                <form id="keywords_form" method="POST">
+                    <select class="form-select d-inline-block w-auto" id="source" name="source">
+                        <option value="Twitter" {% if source_applied[0].source == "Twitter" %}selected{% endif %}>
+                            Twitter
+                        </option>
+                        <option value="Flickr" {% if source_applied[0].source == "Flickr" %}selected{% endif %}>Flickr
+                        </option>
+                    </select>
+                    <input id="keywords" name="keywords" type="text" class="form-control d-inline-block w-auto"
+                            {% if count > 0 %} value='{{ source_applied[0].keywords }}' {% endif %}
+                           placeholder="Search keywords" required>
+                    <label for="number_pic" style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif;">Number
+                        of images:</label>
+                    <input id="number_pic" name="number_pic" {% if count == 0 %}
+                           value=100 {% else %} value= {{ number_images }} {% endif %} type="number" min="100"
+                           max="1000" step="100" class="form-control d-inline-block w-auto">
+                    <button id="source_button" type="submit" class="btn btn-primary source_button" name="source_button"
+                            value="">
+                        Search
+                    </button>
+                    <button id="loading" name="loading" class="loading" type="button" style="display: none;"><i
+                            class="fa fa-circle-o-notch fa-spin"></i> Loading
+                    </button>
+                    <br style="line-height: 5px"/><br style="line-height: 5px"/>
+                </form>
+                {% if tweets[0]|length < number_images|int %}
+                    {% set number = tweets[0]|length %}
+                {% else %}
+                    {% set number = number_images|int %}
                 {% endif %}
+                {% for s in source_applied %}
+                    {% if s.source != "" %}
+                        {% if s.source == 'Twitter' or s.source == 'Flickr' %}
+                            <div class="container" {% if count == 1 %}id="last_container"{% endif %}>
+                                {% for u in range(number) %}
+                                    <div class="image">
+                                        <a href= {% if s.source == 'Twitter' %} "https://twitter.com/anyuser/status/{{ tweets[0][u].id }}" {% else %}
+                                            "https://flic.kr/p/{{ moreparams.get('b58encode')(tweets[0][u].id) }}
+                                            "{% endif %}
+                                        target='_blank'>
+                                        <div class="overlay">
+                                            <label class="switch">
+                                                <input type="checkbox" checked>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <img class="imgrower" src="{{ tweets[0][u].url }}" height="225"
+                                             title='{{ tweets[0][u].text }}' style="display: inline-block;"
+                                             data-tweet-id="{{ tweets[0][u].id }}" loading="lazy"
+                                             onerror="this.style.display='none'"/>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {# <div class="splide d-none" role="group">
+								<div class="splide__track">
+									<ul class="splide__list">
+										{% for u in range(number) %}
+											<li class="splide__slide">
+												<img class="imgrower" src="{{ tweets[0][u].url }}" height="225"
+													 title="{{ tweets[0][u].text }}" style="display: inline-block;"
+													 onerror="this.style.display='none'"/>
+											</li>
+										{% endfor %}
+									</ul>
+								</div>
+							</div> #}
+                        {% endif %}
+                    {% endif %}
+                    <br style="line-height: 5px"/>
+                    <div class="download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
+                        {% if count > 0 %}
+                            <label2><font size="2">{{ tweets[0]|length }} items returned</font></label2>&nbsp;&nbsp;
+                            &nbsp;
+                            <a href="/downloadCSV?id=0">
+                                <button id="download_csv" type="button" name="download_csv" value="0"
+                                        class="btn btn-secondary"
+                                        style="float: right;">Download CSV File
+                                </button>
+                            </a>
+                        {% endif %}
 
-                <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %} selected {% endif %}>Geographic</option>-->
-            </select>
-            {% for message in get_flashed_messages() %}
-            {% if applied[x].Filter == "" %}
-            <span style="color: red;">{{ message }}</span>
-            {% endif %}
-            {% endfor %}
-            <select id={{"option1"~(x+1)}} name="option1_select" {% if applied[x].Filter == scene_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <!--option value="PublicPrivateClassifier" {% if applied[x].Attribute == "PublicPrivateClassifier" %} selected {% endif %}>Outdoors</option-->
-                <optgroup label="Type of scene">
-                    {% for obj in moreparams.get('places365_aggregated') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                    {% endfor %}
-                <optgroup label="Specific scene">
-                    {% for obj in moreparams.get('places365') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                    {% endfor %}
-                </optgroup>
+                    </div>
+                    {% if count > 0 %}
+                        <div class="d-flex flex-row-reverse align-items-start pe-3">
+                            <div class="ms-2">based on hashtags</div>
+                            <label class="switch">
+                                <input id="cloudbox-type-0" class="cloudbox-type-checkbox {% if count == 1 %}lastcloudboxtype{% endif %}" type="checkbox" checked>
+                                <span class="slider round"></span>
+                            </label>
+                            <div class="me-2">based on all words</div>
+                            <div class="d-flex flex-column align-items-end me-3">
+                                <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse0"
+                                        aria-expanded="false" aria-controls="collapse1">
+                                    Suggested Keywords for your Query
+                                </button>
+                                <div class="collapse" id="collapse0">
+                                    <div class="cloudbox center cloudbox-0 {% if count == 1 %}lastcloudbox{% endif %}"
+                                         style="width:600px;">
+                                        <ul class="cloud" role="navigation" aria-label="Webdev tag cloud">
+                                            {% for u in range(10) %}
+                                                <li><a href="#keywords" style="--size: {{ 7 - (u * 0.5) }};"></a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <br style="line-height: 5px"/><br style="line-height: 5px"/>
+                {% endfor %}
 
-                <!--
+            </div>
+            <div class="filters">
+                {% if count>0 %}
+                    {% for x in range(count) %}
+                        <form method="POST" id="{{ "poster"~(x + 1) }}">
+                            <!--button type="submit" id={{"up_button"~(x + 1)}} class= "btn" name= "up_button" value= {{x + 1}}
+                                    {% if count > x + 1 and x > 0 %} style="display:inline;" {% else %}
+                                         style="display:none;" {% endif %}><i class= "fa fa-arrow-up" style="font-size:12px;display:none;"></i></button-->
+                            <select class="form-select d-inline-block w-auto"
+                                    id={{ "Filter"~(x + 1) }} name="Filter_select" required>
+                                <option value="">-Select-</option>
+                                <optgroup label="Preprocessing">
+                                    <option value="{{ duplicates_tag }}" {% if applied[x].Filter == duplicates_tag %}
+                                            selected {% endif %}>{{ duplicates_tag }}</option>
+                                    <option value="{{ nsfw_tag }}" {% if applied[x].Filter == nsfw_tag %}
+                                            selected {% endif %}>{{ nsfw_tag }}</option>
+                                    <option value="{{ meme }}" {% if applied[x].Filter == meme %}
+                                            selected {% endif %}>{{ meme }}</option>
+                                </optgroup>
+                                <optgroup label="Selection">
+                                    <option value="{{ person_tag }}" {% if applied[x].Filter == person_tag %}
+                                            selected {% endif %}>{{ person_tag }}</option>
+                                    <option value="{{ object_tag }}" {% if applied[x].Filter == object_tag %}
+                                            selected {% endif %}>{{ object_tag }}</option>
+                                    <option value="{{ scene_tag }}" {% if applied[x].Filter == scene_tag %}
+                                            selected {% endif %}>{{ scene_tag }}</option>
+                                    <!--option value="{{ object_tag_detr }}"
+                                            {% if applied[x].Filter == object_tag_detr %}
+                                                 selected {% endif %}>{{ object_tag_detr }}</option-->
+                                    <option value="{{ flood_tag }}" {% if applied[x].Filter == flood_tag %}
+                                            selected {% endif %}>{{ flood_tag }}</option>
+
+                                </optgroup>
+                                {% if source_applied[0].source == 'Twitter' %}
+                                    <optgroup label="Location">
+                                        <option value="{{ post_location_tag }}"
+                                                {% if applied[x].Filter == post_location_tag %}
+                                                selected {% endif %}>{{ post_location_tag }}</option>
+                                        <option value="{{ user_location_tag }}"
+                                                {% if applied[x].Filter == user_location_tag %}
+                                                selected {% endif %}>{{ user_location_tag }}</option>
+                                        {% if hasuserloc %}
+                                            <option value="{{ user_location_sel_tag }}"
+                                                    {% if applied[x].Filter == user_location_sel_tag %}
+                                                    selected {% endif %}>{{ user_location_sel_tag }}</option>
+                                        {% endif %}
+                                    </optgroup>
+                                {% endif %}
+
+                                <!--<option value="Geographic" {% if applied[x].Filter == "Geographic" %}
+                                     selected {% endif %}>Geographic</option>-->
+                            </select>
+                            {% for message in get_flashed_messages() %}
+                                {% if applied[x].Filter == "" %}
+                                    <span style="color: red;">{{ message }}</span>
+                                {% endif %}
+                            {% endfor %}
+                            <select class="form-select w-auto" id={{ "option1"~(x + 1) }} name="option1_select"
+                                    {% if applied[x].Filter == scene_tag %}
+                                    style="display:inline;" {% else %}style="display:none;" {% endif %}>
+                                <!--option value="PublicPrivateClassifier"
+                                        {% if applied[x].Attribute == "PublicPrivateClassifier" %}
+                                             selected {% endif %}>Outdoors</option-->
+                                <optgroup label="Type of scene">
+                                    {% for obj in moreparams.get('places365_aggregated') %}
+                                        <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                selected {% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                    <optgroup label="Specific scene">
+                                        {% for obj in moreparams.get('places365') %}
+                                            <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                    selected {% endif %}>{{ obj }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+
+                                    <!--
                 <option value="Indoors" {% if applied[x].Attribute == "Indoors" %} selected {% endif %}>Indoors</option>
                 <option value="Sea" {% if applied[x].Attribute == "Sea" %} selected {% endif %}>Sea</option>
                 <option value="Mountain" {% if applied[x].Attribute == "Mountain" %} selected {% endif %}>Mountain</option>
                 <option value="Day" {% if applied[x].Attribute == "Day" %} selected {% endif %}>Day</option>
                 <option value="Night" {% if applied[x].Attribute == "Night" %} selected {% endif %}>Night</option> -->
-            </select>
-            <select id={{"option2"~(x+1)}} name="option2_select" {% if applied[x].Filter == object_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <optgroup label="People and animals">
-                    {% for obj in moreparams.get('coco_animals') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
+                            </select>
+                            <select class="form-select w-auto" id={{ "option2"~(x + 1) }} name="option2_select"
+                                    {% if applied[x].Filter == object_tag %} style="display:inline;" {% else %}
+                                    style="display:none;" {% endif %}>
+                                <optgroup label="People and animals">
+                                    {% for obj in moreparams.get('coco_animals') %}
+                                        <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                selected {% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="Transportation means">
+                                    {% for obj in moreparams.get('coco_transport') %}
+                                        <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                selected {% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="Landmarks">
+                                    {% for obj in moreparams.get('coco_landmarks') %}
+                                        <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                selected {% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="Devices">
+                                    {% for obj in moreparams.get('coco_devices') %}
+                                        <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                selected {% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="Food">
+                                    {% for obj in moreparams.get('coco_food') %}
+                                        <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                selected {% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="Other">
+                                    {% for obj in moreparams.get('coco_other') %}
+                                        <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                                selected {% endif %}>{{ obj }}</option>
+                                    {% endfor %}
+                                </optgroup>
+
+                                <!--option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %}
+                                     selected {% endif %}>Person</option-->
+                            </select>
+                            <select class="form-select w-auto"
+                                    id={{ "option_obj_select"~(x + 1) }} name="option_obj_select"
+                                    {% if applied[x].Filter == object_tag_detr %} style="display:inline;" {% else %}
+                                    style="display:none;" {% endif %}>
+                                <!--option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %}
+                                     selected {% endif %}>Person</option-->
+                                {% for obj in moreparams.get('coco') %}
+                                    <option value="{{ obj }}" {% if applied[x].object == obj %}
+                                            selected {% endif %}>{{ obj }}</option>
+                                {% endfor %}
+                            </select>
+                            <select class="form-select w-auto" id={{ "option3"~(x + 1) }} name="option3_select"
+                                    {% if applied[x].Filter == user_location_sel_tag %}
+                                    style="display:inline;" {% else %} style="display:none;" {% endif %}>
+                                {% for location in locations[x] %}
+                                    <option value='{{ location }}' {% if applied[x].Attribute == location %}
+                                            selected {% endif %}>{{ location }}</option>
+                                {% endfor %}
+                            </select>
+                            <input id={{ "latitude"~(x + 1) }} name="latitude_text" type="text"
+                                    {% if applied[x].Filter == "Geographic" %} style="display:inline;"
+                                   value={{ applied[x].Attribute[0] }} {% else %} style="display:none;"
+                                   value="-Latitude-" {% endif %}>
+                            <input id={{ "longitude"~(x + 1) }} name="longitude_text" type="text"
+                                    {% if applied[x].Filter == "Geographic" %} style="display:inline;"
+                                   value={{ applied[x].Attribute[1] }} {% else %} style="display:none;"
+                                   value="-Longitude-" {% endif %}>
+                            <label id={{ "label"~(x + 1) }} for={{ "confidence"~(x + 1) }}
+                                    {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %}
+                                   style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %}
+                                   style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence
+                                threshold (%):</label>
+                            <input id={{ "confidence"~(x + 1) }} name="confidence"
+                                   value={{ applied[x].Confidence }} type="number" min="0" max="100" step="1"
+                                    {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %}
+                                   style="width: 50px; display: inline;" {% else %}
+                                   style="width: 50px; display: none;" {% endif %}>
+                            <label id={{ "label_min"~(x + 1) }} for={{ "min_items"~(x + 1) }}
+                                    {% if applied[x].Filter == object_tag or applied[x].Filter == person_tag %}
+                                   style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %}
+                                   style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Min
+                                items:</label>
+                            <input id={{ "min_items"~(x + 1) }} name="min_items" value=
+                                    {% if applied[x].min_items is defined %}{{ applied[x].min_items }}{% else %}1{% endif %}
+                                   type="number" min="0" max="5" step="1"
+                                    {% if applied[x].Filter == object_tag or applied[x].Filter == person_tag %}
+                                   style="width: 50px; display: inline;" {% else %}
+                                   style="width: 50px; display: none;" {% endif %}>
+                            <label id={{ "label_bit"~(x + 1) }} for={{ "bit"~(x + 1) }}
+                                    {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %}
+                                   style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %}
+                                   style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Similarity
+                                threshold (lower values mean less sensitive):</label>
+                            <input id={{ "bit"~(x + 1) }} name="bit"
+                                   value={% if applied[x].bits is defined %}{{ applied[x].bits }}{% else %}8{% endif %}
+                                   type="int" min="0" max="10" step="1"
+                                    {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %}
+                                   style="width: 50px; display: inline;" {% else %}
+                                   style="width: 50px; display: none;" {% endif %}>
+                            <button id={{ "apply_button"~(x + 1) }} type="submit" class="btn btn-primary apply_button"
+                                    name="apply_button"
+                                    value={{ x + 1 }} nom={{ tweets[x]|length }}>Apply
+                            </button>
+                            <button id={{ "loading"~(x + 1) }} name="loading" class="loading" type="button"
+                                    style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading
+                            </button>
+                            <div class="disabledBackgroundContainer" id="disabledBackgroundContainer{{ (x + 1) }}">
+                                <progress id="progressBar{{ x + 1 }}"></progress>
+                            </div> <!-- {{x + 1}}, {{ tweets[x]|length }}  -->
+
+
+                            <br style="line-height: 5px"/><br style="line-height: 5px"/>
+                        </form>
+
+
+
+
+
+                        {% if applied[x].Filter != "" %}
+                            {% for s in source_applied %}
+                                {% if tweets[x + 1]|length < number %}
+                                    {% set number= tweets[x + 1]|length %}
+                                {% endif %}
+                                {% if s.source == 'Twitter' or s.source == 'Flickr' %}
+
+                                    {# % if not hasmap or count != x + 2 % #}
+                                    {% if not hasmap or applied[x].Filter != post_location_tag %}
+
+                                        <div class="container" {% if x + 2 == count %}id="last_container"{% endif %}>
+
+                                            {% for u in range(number) %}
+
+                                                <div class="image">
+
+                                                    <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{ tweets[x + 1][u].id }}' {% else %} 'https://flic.kr/p/
+                                                        {{ moreparams.get('b58encode')(tweets[x + 1][u].id) }}
+                                                        ' {% endif %}
+                                                    target='_blank'>
+
+                                                    <div class="overlay">
+                                                        <label class="switch">
+                                                            <input type="checkbox" checked>
+                                                            <span class="slider round"></span>
+                                                        </label>
+                                                    </div>
+
+                                                    <img class="imgrower" src="{{ tweets[x + 1][u].url }}" height="225"
+                                                         title='{{ tweets[x + 1][u].text }} &#013; User location:
+                                                                 {{ tweets[x + 1][u].user_country }}'
+                                                         style="display: inline-block;"
+                                                         data-tweet-id="{{ tweets[0][u].id }}" loading="lazy"/>
+                                                    </a>
+
+
+                                                </div>
+
+
+                                            {% endfor %}
+
+                                        </div>
+                                    {% endif %}
+
+                                    {# % if hasmap and count == x + 2 % #}
+                                    {% if hasmap and applied[x].Filter == post_location_tag %}
+                                        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center;">
+                                            {{ mapdata|safe }}
+                                        </div>
+                                    {% endif %}
+
+
+                                {% endif %}
+                            {% endfor %}
+
+                        {% endif %}
+
+                        <br style="line-height: 5px"/>
+                        <div class="download d-flex flex-row-reverse align-items-start" style="font-family: Arial, Helvetica, sans-serif;">
+                            <form method="POST" style="float: right;">
+                                {% if count > x + 1 %}
+                                    <label2><font size="2">{{ tweets[x + 1]|length }} items returned</font></label2>
+                                    &nbsp;
+                                    &nbsp;&nbsp;
+                                    <!-- manual annotations console -->
+                                    <a href={{ "/downloadCSV?id="~(x + 1) }}>
+                                        <button id={{ "download_csv"~(x + 1) }} type="button" class="btn btn-secondary"
+                                                name="download_csv" value={{ x + 1 }}\>
+                                            Download CSV File
+                                        </button>
+                                    </a>
+                                    {% if hasmap and applied[x].Filter == post_location_tag %}
+                                        <a href={{ "/downloadCSVs?id="~(x + 1) }}>
+                                            <button id={{ "download_csv_s"~(x + 1) }} type="button"
+                                                    name="download_csv_s" class="btn btn-secondary"
+                                                    value={{ x + 1 }} style="float:right;">Download CSV File (single
+                                                pos)
+                                            </button>
+                                        </a>
+                                        <a href="/map" target="_blank">
+                                            <button id="mymap" type="button" name="mymap" value="0"
+                                                    class="btn btn-secondary"
+                                                    style="float: right;">Show fullscreen map
+                                            </button>
+                                        </a>
+
+                                    {% endif %}
+
+                                {% endif %}
+                            </form>
+
+                            {% if x + 1 < count %}
+                                <div class="ms-2 me-3">based on hashtags</div>
+                                <label class="switch">
+                                    <input id="cloudbox-type-{{ x + 1 }}" class="cloudbox-type-checkbox {% if x + 2 == count %}lastcloudboxtype{% endif %}" type="checkbox" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <div class="me-2">based on all words</div>
+                                <div class="d-flex flex-column align-items-end pe-3">
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapse{{ x + 1 }}"
+                                            aria-expanded="false" aria-controls="collapse1">
+                                        Suggested Keywords for your Query
+                                    </button>
+                                    <div class="collapse" id="collapse{{ x + 1 }}">
+                                        <div class="cloudbox center cloudbox-{{ x + 1 }} {% if x + 2 == count %}lastcloudbox{% endif %}"
+                                             style="width:600px;">
+                                            <ul class="cloud" role="navigation" aria-label="Webdev tag cloud">
+                                                {% for u in range(10) %}
+                                                    <li><a href="#keywords" style="--size: {{ 7 - (u * 0.5) }};"></a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if x + 2 == count %}
+                                <br style="line-height: 5px"/>
+                                <div id="anno_downloader"
+                                     style="float: right; font-family: Arial, Helvetica, sans-serif; display: none">
+                                    <label2><font size="2">Annotations</font></label2>&nbsp;&nbsp;&nbsp;
+                                    <button id="check" style="float: right;">Get</button>
+                                    <button id="reset" style="float: right;">Reset</button>
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+
+                        <br style="line-height: 5px"/>
+                        <br style="line-height: 5px"/>
                     {% endfor %}
-                </optgroup>
-                <optgroup label="Transportation means">
-                    {% for obj in moreparams.get('coco_transport') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                    {% endfor %}
-                </optgroup>
-                <optgroup label="Landmarks">
-                    {% for obj in moreparams.get('coco_landmarks') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                    {% endfor %}
-                </optgroup>
-                <optgroup label="Devices">
-                    {% for obj in moreparams.get('coco_devices') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                    {% endfor %}
-                </optgroup>
-                <optgroup label="Food">
-                    {% for obj in moreparams.get('coco_food') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                    {% endfor %}
-                </optgroup>
-                <optgroup label="Other">
-                    {% for obj in moreparams.get('coco_other') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                    {% endfor %}
-                </optgroup>
-
-                <!--option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %} selected {% endif %}>Person</option--!>
-            </select>
-            <select id={{"option_obj_select"~(x+1)}} name="option_obj_select" {% if applied[x].Filter == object_tag_detr %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                <!--option value="PeopleDetector" {% if applied[x].Attribute == "PeopleDetector" %} selected {% endif %}>Person</option--!>
-                {% for obj in moreparams.get('coco') %}
-                    <option value="{{obj}}" {% if applied[x].object == obj %} selected {% endif %}>{{obj}}</option>
-                {% endfor %}
-
-            </select>
-            <select id={{"option3"~(x+1)}} name="option3_select" {% if applied[x].Filter == user_location_sel_tag %} style="display:inline;" {% else %} style="display:none;" {% endif %}>
-                {% for location in locations[x] %}
-                    <option value='{{location}}' {% if applied[x].Attribute == location %} selected {% endif %}>{{location}}</option>
-                {% endfor %}
-            </select>
-            <input id={{"latitude"~(x+1)}} name="latitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[0]}} {% else %} style="display:none;" value="-Latitude-" {% endif %}>
-            <input id={{"longitude"~(x+1)}} name="longitude_text" type="text" {% if applied[x].Filter == "Geographic" %} style="display:inline;" value={{applied[x].Attribute[1]}} {% else %} style="display:none;" value="-Longitude-" {% endif %}>
-            <label id={{"label"~(x+1)}} for={{"confidence"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Confidence threshold (%):</label>
-            <input id={{"confidence"~(x+1)}} name="confidence" value= {{applied[x].Confidence}} type="number" min="0" max="100" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter != post_location_tag and applied[x].Filter != user_location_tag and applied[x].Filter != user_location_sel_tag and applied[x].Filter != duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
-            <label id={{"label_min"~(x+1)}} for={{"min_items"~(x+1)}} {% if applied[x].Filter == object_tag or applied[x].Filter == person_tag %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style= "margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Min items:</label>
-            <input id={{"min_items"~(x+1)}} name="min_items" value={% if applied[x].min_items is defined %}{{ applied[x].min_items }}{% else %}1{% endif %} type="number" min="0" max="5" step="1" {% if applied[x].Filter == object_tag or applied[x].Filter == person_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
-            <label id={{"label_bit"~(x+1)}} for={{"bit"~(x+1)}} {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: inline;" {% else %} style="margin-left: 20px; font-family: Arial, Helvetica, sans-serif; display: none;" {% endif %}>Similarity threshold (lower values mean less sensitive):</label>
-            <input id={{"bit"~(x+1)}} name="bit" value={% if applied[x].bits is defined %}{{ applied[x].bits }}{% else %}8{% endif %} type="int" min="0" max="10" step="1" {% if applied[x].Filter != '' and applied[x].Filter != '--' and applied[x].Filter == duplicates_tag %} style="width: 50px; display: inline;" {% else %} style="width: 50px; display: none;" {% endif %}>
-            <button id={{"apply_button"~(x+1)}} type="submit" class="apply_button" name="apply_button" value={{x+1}} nom={{ tweets[x]|length }}>Apply</button>
-            <button id={{"loading"~(x+1)}} name="loading" class="loading" type="button" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i> Loading</button>
-            <div class="disabledBackgroundContainer" id="disabledBackgroundContainer{{(x+1)}}">
-                <progress id="progressBar{{x+1}}"></progress>
-            </div> <!-- {{x+1}}, {{ tweets[x]|length }}  -->
-
-
-            <br style="line-height: 5px" /><br style="line-height: 5px" />
-        </form>
-
-
-
-
-
-        {% if applied[x].Filter != "" %}
-        {% for s in source_applied %}
-        {% if tweets[x+1]|length < number %}
-            {% set number= tweets[x+1]|length %}
-        {% endif %}
-        {% if s.source == 'Twitter' or s.source == 'Flickr' %}
-
-            {# % if not hasmap or count != x+2 % #}
-            {% if not hasmap or applied[x].Filter != post_location_tag %}
-
-            <div class="container" {% if x+2 == count %}id="last_container"{% endif %}>
-
-                {% for u in range(number) %}
-
-                <div class="image">
-
-                <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{tweets[x+1][u].id}}' {% else %} 'https://flic.kr/p/{{moreparams.get('b58encode')(tweets[x+1][u].id)}}' {% endif %} target='_blank'>
-
-                    <div class="overlay">
-                     <label class="switch">
-                      <input checked type="checkbox">
-                      <span class="slider round"></span>
-                    </label>
-                    </div>
-
-                    <img class="imgrower" src= {{ tweets[x+1][u].url }} height=100 title='{{tweets[x+1][u].text}} &#013; User location: {{tweets[x+1][u].user_country}}' style="display: inline-block;" loading="lazy"/>
-                </a>
-
-
-              </div>
-
-
-                {% endfor %}
-
-            </div>
-            {% endif %}
-
-            {# % if hasmap and count == x+2 % #}
-            {% if hasmap and applied[x].Filter == post_location_tag %}
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center;">
-                {{ mapdata|safe }}
-            </div>
-            {% endif %}
-
-
-        {% endif %}
-        {% endfor %}
-
-        {% endif %}
-
-        <br style="line-height: 5px" />
-        <div class="download" style="float: right; font-family: Arial, Helvetica, sans-serif;">
-            <form method= "POST">
-            {% if count > x+1 %}
-            <label2><font size="2">{{ tweets[x+1]|length }} items returned</font></label2>&nbsp;&nbsp;&nbsp;
-            <!-- manual annotations console -->
-            <a href={{"/downloadCSV?id="~(x+1)}}>
-                <button id= {{"download_csv"~(x+1)}} type= "button" name= "download_csv" value= {{x+1}} style= "float: right;">Download CSV File</button>
-            </a>
-                {% if hasmap and applied[x].Filter == post_location_tag %}
-                <a href={{"/downloadCSVs?id="~(x+1)}}>
-                <button id= {{"download_csv_s"~(x+1)}} type= "button" name= "download_csv_s" value= {{x+1}} style= "float: right;">Download CSV File (single pos)</button>
-                </a>
-                <a href="/map" target="_blank">
-                    <button id= "mymap" type="button"   name="mymap" value= "0" style= "float: right;">Show fullscreen map</button>
-                </a>
 
                 {% endif %}
-
-            {% endif %}
-            </form>
-
-            {% if x+2 == count %}
-            <br style="line-height: 5px" />
-            <div id="anno_downloader" style="float: right; font-family: Arial, Helvetica, sans-serif; display: none">
-                <label2><font size="2">Annotations</font></label2>&nbsp;&nbsp;&nbsp;
-                <button id="check" style= "float: right;">Get</button>
-                <button id="reset" style= "float: right;">Reset</button>
             </div>
-            {% endif %}
+            <br style="line-height: 5px"/>
+            <div class="reset">
+                <form method="POST">
+                    <button type="submit" name="reset_button" class="btn btn-secondary" value="">Reset Page</button>
+                    {% if count > 0 %}
+                        <a href="/batch" target="_blank">
+                            <button id="batch" type="button" name="batch" class="btn btn-secondary" value="0">Get
+                                configuration for this
+                                pipeline
+                            </button>
+                        </a>
+                    {% endif %}
 
+                </form>
+            </div>
+            <br style="line-height: 5px"/>
+            <br style="line-height: 5px"/>
+
+        </div> <!-- # close grey -->
+
+
+        <!-- The Modal -->
+        <div id="myModal" class="modal" , style="display:{% if firsttime %}block{% else %}none{% endif %};">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span id="close2_" class="close">&times;</span>
+                <!-- YT embed -->
+                <!--iframe width="560" height="315" src="https://www.youtube.com/embed/ZIaayJYDC9w" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe-->
+                <!--<video controls playsinline id="myvideo" src="{% if firsttime %}
+                    /static/video/visualcit_demo_sound.mkv{% else %}
+                    none{% endif %}" controls="yourControls" autoplay="false">-->
+                <video controls playsinline id="myvideo" src="/static/video/visualcit_demo_sound.mkv">
+                    Your browser doesn't support the `video` tag.
+                </video>
+            </div>
         </div>
+    </main>
+
+    <footer class="bg-light d-flex flex-column flex-md-row align-items-center justify-content-between gap-1 px-5 py-3">
+        <div> VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark
+            Carman, Barbara Pernici,
+            Jacopo Frasson, and others...
+        </div>
+        <button onclick="myVideoTrigger()" id="video_trigger" class="btn">&#9432; see the introduction video
+        </button>
+    </footer>
+{% endblock %}
 
 
-        <br style="line-height: 5px" />
-        <br style="line-height: 5px" />
-        {% endfor %}
+{% block scripts %}
+    <!--script src='//js.zapjs.com/js/download.js'></script-->
+    <script>
+        Splide.defaults = {
+            autoWidth: true,
+            gap: "0.5rem",
+            arrows: false,
+            pagination: false,
+            drag: "free",
+            flickPower: 50,
+            breakpoints: {
+                640: {
+                    perPage: 2,
+                },
+            },
+        }
+        const splides = document.getElementsByClassName('splide');
+        for (let i = 0; i < splides.length; i++) {
+            new Splide(splides[i]).mount();
+        }
+    </script>
+    <script>
+        function download(text, filename, type = "text/plain") {
+            // Create an invisible A element
+            const a = document.createElement("a");
+            a.style.display = "none";
+            document.body.appendChild(a);
 
-        {% endif %}
-    </div>
-    <br style="line-height: 5px" />
-    <div class= "reset">
-        <form method="POST">
-            <button type="submit" name="reset_button" value="">Reset Page</button>
-        {% if count > 0 %}
-         <a href="/batch" target="_blank">
-            <button id= "batch" type="button" name="batch" value="0" >Get configuration for this pipeline</button>
-        </a>
-        {% endif %}
+            // Set the HREF to a Blob representation of the data to be downloaded
+            a.href = window.URL.createObjectURL(
+                new Blob([text], {type})
+            );
 
-        </form>
-    </div>
-    <br style="line-height: 5px" />
-    <br style="line-height: 5px" />
+            // Use download attribute to set set desired file name
+            a.setAttribute("download", filename);
 
-    </div> <!-- # close grey -->
+            // Trigger the download by simulating click
+            a.click();
 
+            // Cleanup
+            window.URL.revokeObjectURL(a.href);
+            document.body.removeChild(a);
+        }
+    </script>
+    <!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
+    <script>
+        // Get the modal
+        var modal = document.getElementById("myModal");
 
-<!-- The Modal -->
-<div id="myModal" class="modal", style="display:{% if firsttime %}block{% else %}none{% endif %};">
+        // Get the <span> element that closes the modal
+        var span = document.getElementById("close2_");
 
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span id="close2_" class="close">&times;</span>
-      <!-- YT embed -->
-       <!--iframe width="560" height="315" src="https://www.youtube.com/embed/ZIaayJYDC9w" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe-->
-       <!--<video controls playsinline id="myvideo" src="{% if firsttime %}/static/video/visualcit_demo_sound.mkv{% else %}none{% endif %}" controls="yourControls" autoplay="false">-->
-      <video controls playsinline id="myvideo" src="/static/video/visualcit_demo_sound.mkv" controls="yourControls">
-      Your browser doesn't support the `<video>` tag. /*this is a fallback*/
-      </video>
-  </div>
+        var video = document.getElementById("myvideo");
+        video.pause();
 
-</div>
-
-</div>
-
-<!-- https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal -->
-
-<script>
-// Get the modal
-var modal = document.getElementById("myModal");
-
-// Get the <span> element that closes the modal
-var span = document.getElementById("close2_");
-
-var video = document.getElementById("myvideo");
-video.pause();
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() {
-  modal.style.display = "none";
-  video.pause();
-  video.currentTime = 0;
-}
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-    video.pause();
-    video.currentTime = 0;
-  }
-}
-
-// When the user clicks on the info button, show the modal
-function myVideoTrigger() {
-  if (modal.style.display === "none") {
-    modal.style.display = "block";
-  }
-}
-
-</script>
-
-
-
-<!-- image selectors -->
-<script>
-
-// https://www.w3schools.com/howto/howto_css_switch.asp
-// https://stackoverflow.com/questions/54069360/how-to-place-button-on-top-right-corner-of-image
-
-$(function () {
-		$("#last_container > div").hover(function () {
-
-        var over = $(this).find('.overlay')
-
-        if (over.css("display") != "inline-block") {
-        		over.css("display", "inline-block");
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+            video.pause();
+            video.currentTime = 0;
         }
 
-        //console.log("in");
-    },
-    function () {
-
-        var inpu = $(this).find('input')
-
-        // not unchecked
-        if (inpu.prop("checked") == true) {
-        		var over = $(this).find('.overlay')
-        		over.css("display", "none");
-        }
-
-        //console.log("out");
-    }
-    );
-
-
-    $("#last_container > div > a > div > label > input").click(function () {
-
-        var img = $(this).closest('a').find('img')
-        $(img).toggleClass("selected");
-
-        // each time we click, we show the buttons
-        $(document.getElementById("anno_downloader")).css({"display":"inline-block"})
-
-        if($(this).hasClass("selected")) {
-        //console.log("slider clicker off");
-        }
-        else {
-        //console.log("slider clicker on");
-        }
-
-
-    });
-    $("#reset").click(function () {
-        $("input").val("");
-        $("img.selected").removeClass("selected");
-        $("input").prop("checked", "false");
-        $("div.overlay").css({"display":"none"});
-        $(document.getElementById("anno_downloader")).css({"display":"none"})
-
-    });
-
-    $("#check").click(function () {
-
-        var first_selected = -1;
-            var last_selected = -1;
-            var tmpp;
-
-         var imgs = document.getElementById("last_container").getElementsByTagName('img');
-
-         //traverse to check annotation boundaries
-         for (i = 0; i < imgs.length; i++) {
-
-            tmpp = imgs[i].classList.contains('selected');
-            if (tmpp == true) {
-              if (first_selected < 0) { first_selected = i;}
-              last_selected = i;
+        // When the user clicks anywhere outside the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                video.pause();
+                video.currentTime = 0;
             }
+        }
 
+        // When the user clicks on the info button, show the modal
+        function myVideoTrigger() {
+            if (modal.style.display === "none") {
+                modal.style.display = "block";
+            }
+        }
 
-         }
+    </script>
+    <!-- image selectors -->
+    <script>
 
-         // extract annotated items (need to invert the boolean)
-         var rows = [];
-         for (i = first_selected; i <= last_selected; i++) {
-            console.log(i, imgs[i].classList.contains('selected') , imgs[i].src);
-            var mybol = imgs[i].classList.contains('selected')
-            rows.push([imgs[i].src, !mybol])
+        // https://www.w3schools.com/howto/howto_css_switch.asp
+        // https://stackoverflow.com/questions/54069360/how-to-place-button-on-top-right-corner-of-image
 
-         }
-            // Building the CSV from the Data two-dimensional array
-            // Each column is separated by ";" and new line "\n" for next row
-            var csvContent = '';
-            rows.forEach(function(infoArray, index) {
-              dataString = infoArray.join(';');
-              csvContent += index < rows.length ? dataString + '\n' : dataString;
+        $(function () {
+            $("#last_container > div").hover(function () {
+                    var over = $(this).find('.overlay')
+
+                    if (over.css("display") != "inline-block") {
+                        over.css("display", "inline-block");
+                    }
+
+                    //console.log("in");
+                },
+                function () {
+                    var inpu = $(this).find('input')
+
+                    // not unchecked
+                    if (inpu.prop("checked") == true) {
+                        var over = $(this).find('.overlay')
+                        over.css("display", "none");
+                    }
+
+                    //console.log("out");
+                }
+            );
+
+            document.getElementById("keywords_form").addEventListener("submit", () => {
+                sessionStorage.setItem("keywords", document.getElementById("keywords").value);
+                sessionStorage.setItem("uncheckedIds", "[]");
             });
 
-            console.log(csvContent);
+            function updateUncheckedStorage() {
+                const images = document.querySelectorAll("#last_container .image");
 
-            download(csvContent, "annotations.csv", "text/plain");
-            //alert(csvContent)
-         //console.log(first_selected, last_selected)
+                if (images.length > 0) {
+                    const uncheckedTweetIds = [...images]
+                        .filter(image => !image.querySelector("input").checked)
+                        .map(image => image.querySelector("img").dataset.tweetId);
 
-    });
+                    sessionStorage.setItem("uncheckedIds", JSON.stringify(uncheckedTweetIds));
+                }
+            }
 
-});
+            if (!sessionStorage.getItem("keywords")) {
+                sessionStorage.setItem("keywords", "");
+            }
+            if (!sessionStorage.getItem("uncheckedIds")) {
+                sessionStorage.setItem("uncheckedIds", "[]");
+            }
 
-</script>
+            if (!!sessionStorage.getItem("keywords")) {
+                const sessionKeywords = sessionStorage.getItem("keywords");
+                const inputKeywords = document.getElementById("keywords").value;
+                if (sessionKeywords === inputKeywords) {
+                    const uncheckedIds = JSON.parse(sessionStorage.getItem("uncheckedIds"));
 
-<!--footer class="bg-light small px-3 py-3 mt-auto" id="footer"-->
-<footer class="footer2">
-        <div class="container-fluid">
-            <div class="float-right">
-                VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark Carman, Barbara Pernici, Jacopo Frasson, and others...
-                </br>
-                <button onclick="myVideoTrigger()" id="video_trigger" class="astext">&#9432; see the introduction video</button>
-            </div>
-        </div>
-</footer>
+                    // past containers images
+                    const images = document.querySelectorAll(".container .image");
 
-    <script>
-        for (i=0;i < {{count}};i++) {
-            var a = i+1
-            let Filter_select = document.getElementById('Filter'+a);
-            let option1_select = document.getElementById('option1'+a);
-            let option2_select = document.getElementById('option2'+a);
-            let option_obj_select = document.getElementById('option_obj_select'+a);
-            let option3_select = document.getElementById('option3'+a);
-            let bit_select = document.getElementById('bit'+a);
-            let latitude_text = document.getElementById('latitude'+a);
-            let longitude_text = document.getElementById('longitude'+a);
-            let confidence_numb = document.getElementById('confidence'+a);
-            let confidence_label = document.getElementById('label'+a);
-            let min_items_numb = document.getElementById('min_items'+a);
-            let min_items_label = document.getElementById('label_min'+a);
-            let label_bit = document.getElementById('label_bit'+a);
+                    if (images.length > 0) {
+                        const inputs = [...images]
+                            .filter(image => uncheckedIds.includes(image.querySelector("img").dataset.tweetId))
+                            .map(image => image.querySelector("input"));
 
-            Filter_select.onchange = function() {
-                Filter = Filter_select.value;                
-                if(Filter != '' && Filter != '{{ user_location_sel_tag }}' && Filter != '{{ post_location_tag }}' && Filter != '{{ user_location_tag }}' && Filter != '{{ duplicates_tag }}' ) {
-                confidence_label.style.display='inline';
-                confidence_numb.style.display='inline';
-                }
-                else {
-                confidence_label.style.display='none';
-                confidence_numb.style.display='none';
-                }
-                if(Filter == '{{ duplicates_tag }}') {
-                    bit_select.style.display='inline';
-                    label_bit.style.display='inline';
-                }
-                else {
-                    bit_select.style.display='none';
-                    label_bit.style.display='none';
-                }
-                if(Filter == '{{ scene_tag }}') {
-                    option1_select.style.display='inline';
-                }
-                else {
-                    option1_select.style.display='none';
-                }
-                if(Filter == '{{ object_tag }}') {
-                    option2_select.style.display='inline';
-                    min_items_numb.style.display='inline';
-                    min_items_label.style.display='inline';
-                }
-                else {
-                    option2_select.style.display='none';
-                    min_items_numb.style.display='none';
-                    min_items_label.style.display='none';
-                }
-                if(Filter == '{{ person_tag }}') {
-                    option2_select.style.display='none';
-                    min_items_numb.style.display='inline';
-                    min_items_label.style.display='inline';
-                }
-                else {
-                    if(Filter != '{{ object_tag }}'){
-                    option2_select.style.display='none';
-                    min_items_numb.style.display='none';
-                    min_items_label.style.display='none';
+                        for (let i = 0; i < inputs.length; i++) {
+                            inputs[i].checked = false;
+                            inputs[i].closest("a").querySelector("img").classList.add("selected");
+                        }
+                    }
+
+                    // last container images
+                    const lastImages = document.querySelectorAll("#last_container .image");
+
+                    if (lastImages.length > 0) {
+                        const overlays = [...lastImages]
+                            .filter(image => uncheckedIds.includes(image.querySelector("img").dataset.tweetId))
+                            .map(image => image.querySelector(".overlay"));
+
+                        for (let i = 0; i < overlays.length; i++) {
+                            overlays[i].style.display = "inline-block";
+                        }
                     }
                 }
-                if(Filter == '{{ object_tag_detr }}') {
-                    option_obj_select.style.display='inline';
+            }
+
+            // creating cloud boxes of past images (if any)
+            const containers = document.querySelectorAll(".container:not(#last_container)");
+            for (let i = 0; i < containers.length; i++) {
+                const container = containers[i];
+                const images = container.querySelectorAll(".image");
+
+                if (images.length > 0) {
+                    const checkedImagesTitles = [...images]
+                        .filter((image) => image.querySelector("input").checked)
+                        .map(image => image.querySelector("img").title);
+
+                    const cloudboxTypeInput = document.querySelector(`#cloudbox-type-${i}`);
+
+                    let wordCounts;
+
+                    if (cloudboxTypeInput.checked) {
+                        // this method only uses hashtags
+                        const hashtagRegex = /#(\w*[0-9a-zA-Z]+\w*[0-9a-zA-Z])/g;
+                        const allTitlesJoined = checkedImagesTitles.join(" ");
+                        let m;
+                        const words = [];
+
+                        while ((m = hashtagRegex.exec(allTitlesJoined)) !== null) {
+                            // This is necessary to avoid infinite loops with zero-width matches
+                            if (m.index === hashtagRegex.lastIndex) {
+                                hashtagRegex.lastIndex++;
+                            }
+
+                            words.push(m[1].toLowerCase());
+                        }
+
+                        wordCounts = words
+                            .reduce((map, val) => {
+                                map[val] = (map[val] || 0) + 1; // reducing words to a {word: count} object
+                                return map;
+                            }, {});
+                    } else {
+                        // this method uses all words
+                        const wordMinLength = 2;
+                        const notAllowedWords = ["the", "to", "of", "and", "in", "on", "for", "is", "at", "with", "this", "&amp;"];
+
+                        wordCounts = checkedImagesTitles
+                            .map(w => w.toLowerCase().replaceAll("#", " ")) // convert to lower case and replace # with " "
+                            .flatMap(t => t.split(" ")) // splitting twitts by " "
+                            .flatMap(t => t.split("\n")) // and new lines to get words
+                            .filter(w => w.length >= wordMinLength && // checking for min length
+                                !parseFloat(w) && // removing numbers
+                                !w.startsWith("@") && // removing usernames
+                                !w.includes("t.co") && // removing twitter urls
+                                notAllowedWords.findIndex(x => x.toLowerCase() === w.toLowerCase()) < 0 // removing not allowed words
+                            )
+                            .reduce((map, val) => {
+                                map[val] = (map[val] || 0) + 1; // reducing words to a {word: count} object
+                                return map;
+                            }, {});
+                    }
+
+                    const topTenWords = Object.entries(wordCounts)
+                        .map(x => ({word: x[0], count: x[1]}))
+                        .sort((x, y) => {
+                            if (x.count > y.count) return -1;
+                            if (x.count < y.count) return 1;
+                            return 0;
+                        })
+                        .slice(0, 10)
+                        .map(x => x.word);
+
+                    document.querySelectorAll(`.cloudbox-${i} a`).forEach((el, i) => {
+                        el.innerHTML = topTenWords[i];
+                    });
                 }
-                else {
-                    option_obj_select.style.display='none';
+            }
+
+            const updateAllCloudboxes = () => {
+                const containers = document.querySelectorAll(".container");
+                for (let i = 0; i < containers.length; i++) {
+                    const container = containers[i];
+                    const images = container.querySelectorAll(".image");
+
+                    if (images.length > 0) {
+                        const checkedImagesTitles = [...images]
+                            .filter((image) => image.querySelector("input").checked)
+                            .map(image => image.querySelector("img").title);
+
+                        const cloudboxTypeInput = document.querySelector(`#cloudbox-type-${i}`);
+
+                        let wordCounts;
+
+                        if (cloudboxTypeInput.checked) {
+                            // this method only uses hashtags
+                            const hashtagRegex = /#(\w*[0-9a-zA-Z]+\w*[0-9a-zA-Z])/g;
+                            const allTitlesJoined = checkedImagesTitles.join(" ");
+                            let m;
+                            const words = [];
+
+                            while ((m = hashtagRegex.exec(allTitlesJoined)) !== null) {
+                                // This is necessary to avoid infinite loops with zero-width matches
+                                if (m.index === hashtagRegex.lastIndex) {
+                                    hashtagRegex.lastIndex++;
+                                }
+
+                                words.push(m[1].toLowerCase());
+                            }
+
+                            wordCounts = words
+                                .reduce((map, val) => {
+                                    map[val] = (map[val] || 0) + 1; // reducing words to a {word: count} object
+                                    return map;
+                                }, {});
+                        } else {
+                            // this method uses all words
+                            const wordMinLength = 2;
+                            const notAllowedWords = ["the", "to", "of", "and", "in", "on", "for", "is", "at", "with", "this", "&amp;"];
+
+                            wordCounts = checkedImagesTitles
+                                .map(w => w.toLowerCase().replaceAll("#", " ")) // convert to lower case and replace # with " "
+                                .flatMap(t => t.split(" ")) // splitting twitts by " "
+                                .flatMap(t => t.split("\n")) // and new lines to get words
+                                .filter(w => w.length >= wordMinLength && // checking for min length
+                                    !parseFloat(w) && // removing numbers
+                                    !w.startsWith("@") && // removing usernames
+                                    !w.includes("t.co") && // removing twitter urls
+                                    notAllowedWords.findIndex(x => x.toLowerCase() === w.toLowerCase()) < 0 // removing not allowed words
+                                )
+                                .reduce((map, val) => {
+                                    map[val] = (map[val] || 0) + 1; // reducing words to a {word: count} object
+                                    return map;
+                                }, {});
+                        }
+
+                        const topTenWords = Object.entries(wordCounts)
+                            .map(x => ({word: x[0], count: x[1]}))
+                            .sort((x, y) => {
+                                if (x.count > y.count) return -1;
+                                if (x.count < y.count) return 1;
+                                return 0;
+                            })
+                            .slice(0, 10)
+                            .map(x => x.word);
+
+                        document.querySelectorAll(`.cloudbox-${i} a`).forEach((el, i) => {
+                            el.innerHTML = topTenWords[i];
+                        });
+                    }
                 }
-                if(Filter == '{{ user_location_sel_tag }}') {
-                    option3_select.style.display='inline';
+            };
+
+            // updating cloudboxes on words/hashtag mode
+            const cloudboxTypeCheckboxes = document.querySelectorAll(".cloudbox-type-checkbox");
+            for (let i = 0; i < cloudboxTypeCheckboxes.length; i++) {
+                cloudboxTypeCheckboxes[i].addEventListener("change", updateAllCloudboxes);
+            }
+
+            // changing query when clicking on cloud box suggestion
+            const suggestions = document.querySelectorAll(".cloudbox a");
+            const keywordsInput = document.getElementById("keywords");
+            for (const suggestion of suggestions) {
+                suggestion.addEventListener("click", (e) => {
+                    if (!keywordsInput.value.includes(e.target.innerText)) {
+                        keywordsInput.value = keywordsInput.value + " OR " + e.target.innerText;
+                    }
+                });
+            }
+
+            function updateCloudbox() {
+                const images = document.querySelectorAll("#last_container .image");
+
+                if (images.length > 0) {
+                    const checkedImagesTitles = [...images]
+                        .filter((image) => image.querySelector("input").checked)
+                        .map(image => image.querySelector("img").title);
+
+                    const cloudboxTypeInput = document.querySelector(`.lastcloudboxtype`);
+
+                    let wordCounts;
+
+                    if (cloudboxTypeInput.checked) {
+                        // this method only uses hashtags
+                        const hashtagRegex = /#(\w*[0-9a-zA-Z]+\w*[0-9a-zA-Z])/g;
+                        const allTitlesJoined = checkedImagesTitles.join(" ");
+                        let m;
+                        const words = [];
+
+                        while ((m = hashtagRegex.exec(allTitlesJoined)) !== null) {
+                            // This is necessary to avoid infinite loops with zero-width matches
+                            if (m.index === hashtagRegex.lastIndex) {
+                                hashtagRegex.lastIndex++;
+                            }
+
+                            words.push(m[1].toLowerCase());
+                        }
+
+                        wordCounts = words
+                            .reduce((map, val) => {
+                                map[val] = (map[val] || 0) + 1; // reducing words to a {word: count} object
+                                return map;
+                            }, {});
+                    } else {
+                        // this method uses all words
+                        const wordMinLength = 2;
+                        const notAllowedWords = ["the", "to", "of", "and", "in", "on", "for", "is", "at", "with", "this", "&amp;"];
+
+                        wordCounts = checkedImagesTitles
+                            .map(w => w.toLowerCase().replaceAll("#", " ")) // convert to lower case and replace # with " "
+                            .flatMap(t => t.split(" ")) // splitting twitts by " "
+                            .flatMap(t => t.split("\n")) // and new lines to get words
+                            .filter(w => w.length >= wordMinLength && // checking for min length
+                                !parseFloat(w) && // removing numbers
+                                !w.startsWith("@") && // removing usernames
+                                !w.includes("t.co") && // removing twitter urls
+                                notAllowedWords.findIndex(x => x.toLowerCase() === w.toLowerCase()) < 0 // removing not allowed words
+                            )
+                            .reduce((map, val) => {
+                                map[val] = (map[val] || 0) + 1; // reducing words to a {word: count} object
+                                return map;
+                            }, {});
+                    }
+
+                    const topTenWords = Object.entries(wordCounts)
+                        .map(x => ({word: x[0], count: x[1]}))
+                        .sort((x, y) => {
+                            if (x.count > y.count) return -1;
+                            if (x.count < y.count) return 1;
+                            return 0;
+                        })
+                        .slice(0, 10)
+                        .map(x => x.word);
+
+                    document.querySelectorAll(".lastcloudbox a").forEach((el, i) => {
+                        el.innerHTML = topTenWords[i];
+                    });
                 }
-                else {
-                    option3_select.style.display='none';
+            };
+
+            updateCloudbox();
+
+            $("#last_container > div > a > div > label > input").click(function (e) {
+                $(this).closest('a').find('img').toggleClass("selected", !e.target.checked);
+
+                // each time we click, we show the buttons
+                $(document.getElementById("anno_downloader")).css({"display": "inline-block"});
+
+                updateUncheckedStorage();
+                updateCloudbox();
+
+                if ($(this).hasClass("selected")) {
+                    //console.log("slider clicker off");
+                } else {
+                    //console.log("slider clicker on");
                 }
-                if(Filter == 'Geographic') {
-                    latitude_text.style.display='inline';
-                    longitude_text.style.display='inline';
+            });
+            $("#reset").click(function () {
+                $("input").val("");
+                $("img.selected").removeClass("selected");
+                $("input").prop("checked", "false");
+                $("div.overlay").css({"display": "none"});
+                $(document.getElementById("anno_downloader")).css({"display": "none"})
+
+            });
+
+            $("#check").click(function () {
+                var first_selected = -1;
+                var last_selected = -1;
+                var tmpp;
+
+                var imgs = document.getElementById("last_container").getElementsByTagName('img');
+
+                //traverse to check annotation boundaries
+                for (i = 0; i < imgs.length; i++) {
+                    tmpp = imgs[i].classList.contains('selected');
+                    if (tmpp == true) {
+                        if (first_selected < 0) {
+                            first_selected = i;
+                        }
+                        last_selected = i;
+                    }
                 }
-                else {
-                    latitude_text.style.display='none';
-                    longitude_text.style.display='none';
+
+                // extract annotated items (need to invert the boolean)
+                var rows = [];
+                for (i = first_selected; i <= last_selected; i++) {
+                    console.log(i, imgs[i].classList.contains('selected'), imgs[i].src);
+                    var mybol = imgs[i].classList.contains('selected')
+                    rows.push([imgs[i].src, !mybol])
+                }
+                // Building the CSV from the Data two-dimensional array
+                // Each column is separated by ";" and new line "\n" for next row
+                var csvContent = '';
+                rows.forEach(function (infoArray, index) {
+                    dataString = infoArray.join(';');
+                    csvContent += index < rows.length ? dataString + '\n' : dataString;
+                });
+
+                console.log(csvContent);
+
+                download(csvContent, "annotations.csv", "text/plain");
+                //alert(csvContent)
+                //console.log(first_selected, last_selected)
+            });
+        });
+    </script>
+    <script>
+        for (i = 0; i < {{count}}; i++) {
+            var a = i + 1
+            let Filter_select = document.getElementById('Filter' + a);
+            let option1_select = document.getElementById('option1' + a);
+            let option2_select = document.getElementById('option2' + a);
+            let option_obj_select = document.getElementById('option_obj_select' + a);
+            let option3_select = document.getElementById('option3' + a);
+            let bit_select = document.getElementById('bit' + a);
+            let latitude_text = document.getElementById('latitude' + a);
+            let longitude_text = document.getElementById('longitude' + a);
+            let confidence_numb = document.getElementById('confidence' + a);
+            let confidence_label = document.getElementById('label' + a);
+            let min_items_numb = document.getElementById('min_items' + a);
+            let min_items_label = document.getElementById('label_min' + a);
+            let label_bit = document.getElementById('label_bit' + a);
+
+            Filter_select.onchange = function () {
+                Filter = Filter_select.value;
+                if (Filter !== '' && Filter !== '{{ user_location_sel_tag }}' && Filter !== '{{ post_location_tag }}' && Filter !== '{{ user_location_tag }}' && Filter !== '{{ duplicates_tag }}') {
+                    confidence_label.style.display = 'inline';
+                    confidence_numb.style.display = 'inline';
+                } else {
+                    confidence_label.style.display = 'none';
+                    confidence_numb.style.display = 'none';
+                }
+                if (Filter === '{{ duplicates_tag }}') {
+                    bit_select.style.display = 'inline';
+                    label_bit.style.display = 'inline';
+                } else {
+                    bit_select.style.display = 'none';
+                    label_bit.style.display = 'none';
+                }
+                if (Filter === '{{ scene_tag }}') {
+                    option1_select.style.display = 'inline';
+                } else {
+                    option1_select.style.display = 'none';
+                }
+                if (Filter === '{{ object_tag }}') {
+                    option2_select.style.display = 'inline';
+                    min_items_numb.style.display = 'inline';
+                    min_items_label.style.display = 'inline';
+                } else {
+                    option2_select.style.display = 'none';
+                    min_items_numb.style.display = 'none';
+                    min_items_label.style.display = 'none';
+                }
+                if (Filter === '{{ person_tag }}') {
+                    option2_select.style.display = 'none';
+                    min_items_numb.style.display = 'inline';
+                    min_items_label.style.display = 'inline';
+                } else {
+                    if (Filter !== '{{ object_tag }}') {
+                        option2_select.style.display = 'none';
+                        min_items_numb.style.display = 'none';
+                        min_items_label.style.display = 'none';
+                    }
+                }
+                if (Filter === '{{ object_tag_detr }}') {
+                    option_obj_select.style.display = 'inline';
+                } else {
+                    option_obj_select.style.display = 'none';
+                }
+                if (Filter === '{{ user_location_sel_tag }}') {
+                    option3_select.style.display = 'inline';
+                } else {
+                    option3_select.style.display = 'none';
+                }
+                if (Filter === 'Geographic') {
+                    latitude_text.style.display = 'inline';
+                    longitude_text.style.display = 'inline';
+                } else {
+                    latitude_text.style.display = 'none';
+                    longitude_text.style.display = 'none';
                 }
             }
         }
@@ -604,119 +1077,117 @@ $(function () {
         let loading_symbol = document.getElementById('loading');
         let keywords_text = document.getElementById('keywords');
         let number_pic = document.getElementById('number_pic');
-        
-        search_button.onclick = function() {
+
+        search_button.onclick = function () {
             keywords = keywords_text.value;
-            if(keywords != '' && number_pic.value < 1001) {
-                search_button.style.display='none';
-                loading_symbol.style.display='inline';
-            }            
-            
+            if (keywords !== '' && number_pic.value < 1001) {
+                search_button.style.display = 'none';
+                loading_symbol.style.display = 'inline';
+            }
+
         }
-        window.onload = function() {
-            search_button.style.display='inline';
-            loading_symbol.style.display='none';
-            if ('{{alert}}' != '') {
+        window.onload = function () {
+            search_button.style.display = 'inline';
+            loading_symbol.style.display = 'none';
+            if ('{{alert}}' !== '') {
                 alert('{{alert}}');
-            }                        
+            }
         }
-        
+
     </script>
     <script>
-        for (i=0;i < {{count}};i++) {
-            var a = i+1
-            let apply_button = document.getElementById('apply_button'+a);
-            let up_button = document.getElementById('up_button'+a);
-            let loading_symbol = document.getElementById('loading'+a);
-            let Filter_select = document.getElementById('Filter'+a);
-            let confidence = document.getElementById('confidence'+a);
-            
-            apply_button.onclick = function() {
+        for (i = 0; i < {{count}}; i++) {
+            var a = i + 1
+            let apply_button = document.getElementById('apply_button' + a);
+            let up_button = document.getElementById('up_button' + a);
+            let loading_symbol = document.getElementById('loading' + a);
+            let Filter_select = document.getElementById('Filter' + a);
+            let confidence = document.getElementById('confidence' + a);
+
+            apply_button.onclick = function () {
                 Filter = Filter_select.value;
 
-                if(Filter != '' && confidence.value < 101) {
-                    apply_button.style.display='none';
-                    loading_symbol.style.display='inline';
+                if (Filter !== '' && confidence.value < 101) {
+                    apply_button.style.display = 'none';
+                    loading_symbol.style.display = 'inline';
                     serverCall(a);
                 }
 
 
             }
-            window.onload = function() {
-                apply_button.style.display='inline';
-                loading_symbol.style.display='none';
-                if ('{{alert}}' != '') {
+            window.onload = function () {
+                apply_button.style.display = 'inline';
+                loading_symbol.style.display = 'none';
+                if ('{{alert}}' !== '') {
                     alert('{{alert}}');
-                }            
-            }
-        }           
-        
-    </script>
-
-    <script>
-            $(window).scroll(function () {
-            sessionStorage.scrollTop = $(this).scrollTop();
-            });
-            $(document).ready(function () {
-                if (sessionStorage.scrollTop != "undefined") {
-                    $(window).scrollTop(sessionStorage.scrollTop);
                 }
-            });
-    </script>
-    <script>
-
-    for (i=0;i < {{count}};i++) {
-        var a = i+1
-        var input1 = document.getElementById('confidence'+a);
-        var input2 = document.getElementById('bit'+a);
-        var apply_button = document.getElementById('up_button'+a);
-        let Filter_select = document.getElementById('Filter'+a);
-        var myform = document.getElementById('poster'+a);
-
-        input1.addEventListener("keypress", function(event) {
-            if (event.keyCode === 13 || event.which === 13 || event.code === 'Enter') {
-                event.preventDefault();
-                Filter = Filter_select.value;
-                myform.submit();
-            }
-        });
-
-        input2.addEventListener("keypress", function(event) {
-            if (event.keyCode === 13 || event.which === 13 || event.code === 'Enter') {
-                event.preventDefault();
-                Filter = Filter_select.value;
-                myform.submit();
             }
         }
-        );
-    }
+
+    </script>
+    <script>
+        $(window).scroll(function () {
+            sessionStorage.scrollTop = $(this).scrollTop();
+        });
+        $(document).ready(function () {
+            if (sessionStorage.scrollTop != "undefined") {
+                $(window).scrollTop(sessionStorage.scrollTop);
+            }
+        });
+    </script>
+    <script>
+
+        for (i = 0; i < {{count}}; i++) {
+            var a = i + 1
+            var input1 = document.getElementById('confidence' + a);
+            var input2 = document.getElementById('bit' + a);
+            var apply_button = document.getElementById('up_button' + a);
+            let Filter_select = document.getElementById('Filter' + a);
+            var myform = document.getElementById('poster' + a);
+
+            input1.addEventListener("keypress", function (event) {
+                if (event.keyCode === 13 || event.which === 13 || event.code === 'Enter') {
+                    event.preventDefault();
+                    Filter = Filter_select.value;
+                    myform.submit();
+                }
+            });
+
+            input2.addEventListener("keypress", function (event) {
+                    if (event.keyCode === 13 || event.which === 13 || event.code === 'Enter') {
+                        event.preventDefault();
+                        Filter = Filter_select.value;
+                        myform.submit();
+                    }
+                }
+            );
+        }
 
     </script>
     <script>
         function serverCall(id) {
 
-        console.log(id)
-        var container = document.getElementById('disabledBackgroundContainer'+a),
-        progressBar = document.getElementById('progressBar'+a),
-        applyButton = document.getElementById('apply_button'+a)
-        duration = applyButton.getAttribute("nom") * 1000,
+            console.log(id)
+            var container = document.getElementById('disabledBackgroundContainer' + a),
+                progressBar = document.getElementById('progressBar' + a),
+                applyButton = document.getElementById('apply_button' + a)
+            duration = applyButton.getAttribute("nom") * 1000,
 
-        current_progress = 0,
+                current_progress = 0,
 
-        progressBar.setAttribute("max", 100);
+                progressBar.setAttribute("max", 100);
 
-        $(container).css("display", "inline");
+            $(container).css("display", "inline");
 
-        var step = 0.01;
-        var timer = setInterval(function() {
+            var step = 0.01;
+            var timer = setInterval(function () {
                 current_progress += step;
                 progress = Math.round(Math.atan(current_progress) / (Math.PI / 2) * 100 * 1000) / 1000
                 progressBar.setAttribute('value', progress);
-                if (progress >= 100){
-                            clearInterval(interval);
+                if (progress >= 100) {
+                    clearInterval(interval);
                 }
             }, 100);
-    }
+        }
     </script>
-
 {% endblock %}

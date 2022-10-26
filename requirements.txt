@@ -1,0 +1,8 @@
+pandas
+flask
+Flask-Session
+geopy
+geotext
+folium
+requests
+numpy
