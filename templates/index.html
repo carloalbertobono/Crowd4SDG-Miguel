@@ -47,10 +47,6 @@
                     <button id="loading" name="loading" class="loading" type="button" style="display: none;"><i
                             class="fa fa-circle-o-notch fa-spin"></i> Loading
                     </button>
-                    <div class="d-flex w-100 float-end" style="max-width: 26rem;">
-                        <label for="imageSizeRange" class="form-label me-3">Image size</label>
-                        <input type="range" class="form-range h-auto" min="175" max="275" value="225" id="imageSizeRange" style="max-width: 20rem;">
-                    </div>
                     <br style="line-height: 5px"/><br style="line-height: 5px"/>
                 </form>
                 {% if tweets[0]|length < number_images|int %}
@@ -115,7 +111,7 @@
                         <div class="d-flex flex-row-reverse align-items-start pe-3">
                             <div class="ms-2">based on hashtags</div>
                             <label class="switch">
-                                <input id="cloudbox-type-0" class="cloudbox-type-checkbox {% if count == 1 %}lastcloudboxtype{% endif %}" type="checkbox">
+                                <input id="cloudbox-type-0" class="cloudbox-type-checkbox {% if count == 1 %}lastcloudboxtype{% endif %}" type="checkbox" checked>
                                 <span class="slider round"></span>
                             </label>
                             <div class="me-2">based on all words</div>
@@ -438,7 +434,7 @@
                             {% if x + 1 < count %}
                                 <div class="ms-2 me-3">based on hashtags</div>
                                 <label class="switch">
-                                    <input id="cloudbox-type-{{ x + 1 }}" class="cloudbox-type-checkbox {% if x + 2 == count %}lastcloudboxtype{% endif %}" type="checkbox">
+                                    <input id="cloudbox-type-{{ x + 1 }}" class="cloudbox-type-checkbox {% if x + 2 == count %}lastcloudboxtype{% endif %}" type="checkbox" checked>
                                     <span class="slider round"></span>
                                 </label>
                                 <div class="me-2">based on all words</div>
@@ -638,36 +634,9 @@
                 }
             );
 
-            function updateImagesSize(size) {
-                const images = document.querySelectorAll("img.imgrower");
-                for (const image of images) {
-                    image.height = size;
-                }
-            }
-
-            const imageSizeRange = document.getElementById("imageSizeRange");
-            if (!!localStorage.getItem("imageSize")) {
-                const size = parseInt(localStorage.getItem("imageSize"));
-                imageSizeRange.value = size;
-                updateImagesSize(size);
-            } else {
-                localStorage.setItem("imageSize", imageSizeRange.value.toString());
-            }
-            imageSizeRange.addEventListener("input", (e) => {
-                const size = parseInt(e.target.value);
-                localStorage.setItem("imageSize", size.toString());
-                updateImagesSize(size);
-            });
-
-            if (document.querySelectorAll("img.imgrower").length <= 0) {
-                imageSizeRange.parentElement.style.display = "none";
-                imageSizeRange.parentElement.classList.remove("d-flex");
-            }
-
             document.getElementById("keywords_form").addEventListener("submit", () => {
                 sessionStorage.setItem("keywords", document.getElementById("keywords").value);
                 sessionStorage.setItem("uncheckedIds", "[]");
-                sessionStorage.setItem("cloudboxTypes", "[]");
             });
 
             function updateUncheckedStorage() {
@@ -737,13 +706,6 @@
 
                     const cloudboxTypeInput = document.querySelector(`#cloudbox-type-${i}`);
 
-                    if (!!sessionStorage.getItem("cloudboxTypes")) {
-                        const cloudboxTypes = JSON.parse(sessionStorage.getItem("cloudboxTypes"));
-                        if(cloudboxTypes.length - 1 >= i) {
-                            cloudboxTypeInput.checked = cloudboxTypes[i];
-                        }
-                    }
-
                     let wordCounts;
 
                     if (cloudboxTypeInput.checked) {
@@ -799,19 +761,12 @@
                         .map(x => x.word);
 
                     document.querySelectorAll(`.cloudbox-${i} a`).forEach((el, i) => {
-                            if (cloudboxTypeInput.checked) {
-                                el.innerHTML = "#" + topTenWords[i];
-                            } else {
-                                el.innerHTML = topTenWords[i];
-                            }
+                        el.innerHTML = topTenWords[i];
                     });
                 }
             }
 
             const updateAllCloudboxes = () => {
-                const cloudboxTypeCheckboxes = document.querySelectorAll(".cloudbox-type-checkbox");
-                sessionStorage.setItem("cloudboxTypes", JSON.stringify([...cloudboxTypeCheckboxes].map(c => c.checked)));
-
                 const containers = document.querySelectorAll(".container");
                 for (let i = 0; i < containers.length; i++) {
                     const container = containers[i];
@@ -879,11 +834,7 @@
                             .map(x => x.word);
 
                         document.querySelectorAll(`.cloudbox-${i} a`).forEach((el, i) => {
-                            if (cloudboxTypeInput.checked) {
-                                el.innerHTML = "#" + topTenWords[i];
-                            } else {
-                                el.innerHTML = topTenWords[i];
-                            }
+                            el.innerHTML = topTenWords[i];
                         });
                     }
                 }
@@ -900,12 +851,8 @@
             const keywordsInput = document.getElementById("keywords");
             for (const suggestion of suggestions) {
                 suggestion.addEventListener("click", (e) => {
-                    let word = e.target.innerText;
-                    if (word.charAt(0) === '#') {
-                        word = word.substring(1);
-                    }
-                    if (!keywordsInput.value.includes(word)) {
-                        keywordsInput.value = keywordsInput.value + " OR " + word;
+                    if (!keywordsInput.value.includes(e.target.innerText)) {
+                        keywordsInput.value = keywordsInput.value + " OR " + e.target.innerText;
                     }
                 });
             }
@@ -975,11 +922,7 @@
                         .map(x => x.word);
 
                     document.querySelectorAll(".lastcloudbox a").forEach((el, i) => {
-                            if (cloudboxTypeInput.checked) {
-                                el.innerHTML = "#" + topTenWords[i];
-                            } else {
-                                el.innerHTML = topTenWords[i];
-                            }
+                        el.innerHTML = topTenWords[i];
                     });
                 }
             };
