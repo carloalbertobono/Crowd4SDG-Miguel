@@ -568,7 +568,7 @@ def downloadCSV():
     df_ = csv_contents[int(request.args.get('id'))]
     tmp = StringIO(df_)
     df_ = pd.read_csv(tmp)
-    df_ = df_.rename(columns={"media_url": "info_media_url"}, errors='ignore')
+    df_ = df_.rename(columns={"media_url": "url"}, errors='ignore')
 
     if 'CIME_geolocation_centre_first' in df_:
         df_ = df_.drop(columns=['CIME_geolocation_centre_first',
