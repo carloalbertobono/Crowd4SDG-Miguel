@@ -25,17 +25,19 @@
         <div style="position: relative;z-index: 0;">
             <div class="source">
                 <form id="keywords_form" method="POST">
-                    <select class="form-select d-inline-block w-auto" id="source" name="source">
-                        <option value="Twitter" {% if source_applied[0].source == "Twitter" %}selected{% endif %}>
-                            Twitter
+                    <select class="form-select d-inline-block w-auto" id="source" name="source" onchange="showDiv('searchbar', this)">
+                        <option value="Reddit" {% if source_applied[0].source == "Reddit" %}selected{% endif %}>
+                            Reddit
                         </option>
                         <option value="Flickr" {% if source_applied[0].source == "Flickr" %}selected{% endif %}>
                             Flickr
                         </option>
-                        <option value="Reddit"  {% if source_applied[0].source == "Reddit" %}selected{% endif %}>
-                            Reddit
+                        <option value="Twitter"  {% if source_applied[0].source == "Twitter" %}selected{% endif %}>
+                            Twitter
                         </option>
                     </select>
+
+                    <div id="searchbar" style="display:inline-block;">
                     <input id="keywords" name="keywords" type="text" class="form-control d-inline-block w-auto"
                             {% if count > 0 %} value='{{ source_applied[0].keywords }}' {% endif %}
                            placeholder="Search keywords" required>
@@ -44,14 +46,21 @@
                     <input id="number_pic" name="number_pic" {% if count == 0 %}
                            value=100 {% else %} value= {{ number_images }} {% endif %} type="number" min="100"
                            max="1000" step="100" class="form-control d-inline-block w-auto">
+                    </div>
 
-                    <div class="engine-info" id="Reddit-info" style="display:none;">
-                            <label for="inputSubreddit">Subreddit</label>
-                            <input  id="inputSubreddit" name="inputSubreddit" {% if count > 0 %} value='{{ source_applied[0].inputSubreddit }}' {% endif %}
-                            type="text" class="form-control d-inline-block w-auto" placeholder="Subreddit">
-                            <small id="keywordHelp" class="form-text text-muted">The subreddit is optional, if empty r/all is used</small>
+                    <div class="engine-info" id="Twitter-info" style="display:none;">
+                            <small id="keywordHelp" class="form-text text-muted">Twitter search API is available as a paid service since April 2023</small>
                      
                     </div>
+
+                    <div class="engine-info" id="Reddit-info" style="display:inline-block;">
+                            <label for="inputSubreddit">Subreddit</label>
+                            <input  id="inputSubreddit" name="inputSubreddit" {% if count > 0 %} value='{{ source_applied[0].inputSubreddit }}' {% endif %}
+                            type="text" class="form-control d-inline-block w-auto" placeholder="Subreddit (r/all if empty)">
+                            <!--small id="keywordHelp" class="form-text text-muted"></small-->
+                     
+                    </div>
+
                     <button id="source_button" type="submit" class="btn btn-primary source_button" name="source_button"
                             value="">
                         Search
@@ -541,9 +550,7 @@
     </main>
 
     <footer class="bg-light d-flex flex-column flex-md-row align-items-center justify-content-between gap-1 px-5 py-3">
-        <div> VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Mark
-            Carman, Barbara Pernici,
-            Jacopo Frasson, and others...
+        <div> VisualCit interface created by Miguel Armendáriz Jáuregui, Carlo Alberto Bono, Edoardo Ramalli, Luca Cicchese, Mark Carman, Barbara Pernici, Jacopo Frasson, and others...
         </div>
         <button onclick="myVideoTrigger()" id="video_trigger" class="btn">&#9432; see the introduction video
         </button>
@@ -1284,9 +1291,19 @@
         const selectedEngine = engineSelect.value;
         if (selectedEngine) {
             const selectedEngineInfo = document.getElementById(selectedEngine + "-info");
-            selectedEngineInfo.style.display = "block";
+            selectedEngineInfo.style.display = "inline-block";
         }
         });
 
     </script>
+
+    <script>
+    function showDiv(divId, element)
+            {
+                document.getElementById(divId).style.display = element.value != "Twitter" ? 'inline-block' : 'none';
+            }
+
+    </script>
+
+
 {% endblock %}
