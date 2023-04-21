@@ -24,7 +24,7 @@ geolocator = Nominatim(user_agent="example app")
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 server = '131.175.120.2:7779'
-test = '127.0.0.1:8000'
+test = '127.0.0.1:7777'
 
 address = server
 
@@ -107,9 +107,15 @@ def index():
                 option = request.form['source']
                 keywords = request.form['keywords']
                 number_images = request.form['number_pic']
+                inputSubreddit = 'all'
+                
+                if request.form['inputSubreddit']:
+                    testsub = request.form['inputSubreddit']
+                    print(f'The test sub is {testsub}')
+                
 
                 r = requests.post('http://' + address + '/Crawler/API/CrawlCSV',
-                                  json={'query': keywords, 'count': number_images, 'preload_images': True, 'source': option})
+                                    json={'query': keywords, 'count': number_images, 'preload_images': True, 'source': option, 'subreddit': inputSubreddit})
 
                 if len(r.text) != 1:
                     s = {'ID': count, 'source': option, 'keywords': keywords}
@@ -162,9 +168,11 @@ def index():
                 option = request.form['source']
                 keywords = request.form['keywords']
                 number_images = request.form['number_pic']
-
+                inputSubreddit = 'all'
+                
                 r = requests.post('http://' + address + '/Crawler/API/CrawlCSV',
-                                  json={'query': keywords, 'count': number_images, 'preload_images': True, 'source': option})
+                                    json={'query': keywords, 'count': number_images, 'preload_images': True, 'source': option, 'subreddit': inputSubreddit})
+                    
                 if len(r.text) != 1:
                     s = {'ID': 0, 'source': option, 'keywords': keywords}
                     source_applied[0] = s

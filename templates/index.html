@@ -29,7 +29,11 @@
                         <option value="Twitter" {% if source_applied[0].source == "Twitter" %}selected{% endif %}>
                             Twitter
                         </option>
-                        <option value="Flickr" {% if source_applied[0].source == "Flickr" %}selected{% endif %}>Flickr
+                        <option value="Flickr" {% if source_applied[0].source == "Flickr" %}selected{% endif %}>
+                            Flickr
+                        </option>
+                        <option value="Reddit"  {% if source_applied[0].source == "Reddit" %}selected{% endif %}>
+                            Reddit
                         </option>
                     </select>
                     <input id="keywords" name="keywords" type="text" class="form-control d-inline-block w-auto"
@@ -40,6 +44,14 @@
                     <input id="number_pic" name="number_pic" {% if count == 0 %}
                            value=100 {% else %} value= {{ number_images }} {% endif %} type="number" min="100"
                            max="1000" step="100" class="form-control d-inline-block w-auto">
+
+                    <div class="engine-info" id="Reddit-info" style="display:none;">
+                            <label for="inputSubreddit">Subreddit</label>
+                            <input  id="inputSubreddit" name="inputSubreddit" {% if count > 0 %} value='{{ source_applied[0].inputSubreddit }}' {% endif %}
+                            type="text" class="form-control d-inline-block w-auto" placeholder="Subreddit">
+                            <small id="keywordHelp" class="form-text text-muted">The subreddit is optional, if empty r/all is used</small>
+                     
+                    </div>
                     <button id="source_button" type="submit" class="btn btn-primary source_button" name="source_button"
                             value="">
                         Search
@@ -60,14 +72,18 @@
                 {% endif %}
                 {% for s in source_applied %}
                     {% if s.source != "" %}
-                        {% if s.source == 'Twitter' or s.source == 'Flickr' %}
+                        {% if s.source == 'Twitter' or s.source == 'Flickr'  or s.source == 'Reddit'%}
                             <div class="container" {% if count == 1 %}id="last_container"{% endif %}>
                                 {% for u in range(number) %}
                                     <div class="image">
-                                        <a href= {% if s.source == 'Twitter' %} "https://twitter.com/anyuser/status/{{ tweets[0][u].id }}" {% else %}
-                                            "https://flic.kr/p/{{ moreparams.get('b58encode')(tweets[0][u].id) }}
-                                            "{% endif %}
+                                        <a href= {% if s.source == 'Twitter' %} "https://twitter.com/anyuser/status/{{ tweets[0][u].id }}"
+                                        {% elif s.source == 'Flickr'%}  "https://flic.kr/p/{{ moreparams.get('b58encode')(tweets[0][u].id) }} "
+                                        {% elif s.source == 'Reddit' %} 'https://www.reddit.com/{{ tweets[0][u].id }} '
+                                        {% endif %}
                                         target='_blank'>
+
+
+
                                         <div class="overlay">
                                             <label class="switch">
                                                 <input type="checkbox" checked>
@@ -174,7 +190,7 @@
                                             selected {% endif %}>{{ flood_tag }}</option>
 
                                 </optgroup>
-                                {% if source_applied[0].source == 'Twitter' %}
+                                {% if source_applied[0].source == 'Twitter' or source_applied[0].source == 'Reddit'  %}
                                     <optgroup label="Location">
                                         <option value="{{ post_location_tag }}"
                                                 {% if applied[x].Filter == post_location_tag %}
@@ -349,7 +365,7 @@
                                 {% if tweets[x + 1]|length < number %}
                                     {% set number= tweets[x + 1]|length %}
                                 {% endif %}
-                                {% if s.source == 'Twitter' or s.source == 'Flickr' %}
+                                {% if s.source == 'Twitter' or s.source == 'Flickr' or s.source == 'Reddit' %}
 
                                     {# % if not hasmap or count != x + 2 % #}
                                     {% if not hasmap or applied[x].Filter != post_location_tag %}
@@ -360,9 +376,10 @@
 
                                                 <div class="image">
 
-                                                    <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{ tweets[x + 1][u].id }}' {% else %} 'https://flic.kr/p/
-                                                        {{ moreparams.get('b58encode')(tweets[x + 1][u].id) }}
-                                                        ' {% endif %}
+                                                    <a href= {% if s.source == 'Twitter' %} 'https://twitter.com/anyuser/status/{{ tweets[x + 1][u].id }}'
+                                                    {% elif s.source == 'Flickr' %} 'https://flic.kr/p/ {{ moreparams.get('b58encode')(tweets[x + 1][u].id) }} '
+                                                    {% elif s.source == 'Reddit' %} 'https://www.reddit.com/{{ tweets[x + 1][u].id }} '
+                                                    {% endif %}
                                                     target='_blank'>
 
                                                     <div class="overlay">
@@ -459,6 +476,10 @@
                                         </div>
                                     </div>
                                 </div>
+
+
+
+
                             {% endif %}
 
                             {% if x + 2 == count %}
@@ -1134,6 +1155,7 @@
         let loading_symbol = document.getElementById('loading');
         let keywords_text = document.getElementById('keywords');
         let number_pic = document.getElementById('number_pic');
+        let inputSubreddit = document.getElementById('inputSubreddit');
 
         search_button.onclick = function () {
             keywords = keywords_text.value;
@@ -1246,5 +1268,25 @@
                 }
             }, 100);
         }
+    </script>
+
+    <script>
+        const engineSelect = document.getElementById("source");
+        const engineInfos = document.querySelectorAll(".engine-info");
+
+        engineSelect.addEventListener("change", function() {
+        // Hide all engine info divs
+        engineInfos.forEach(function(engineInfo) {
+            engineInfo.style.display = "none";
+        });
+
+        // Show the selected engine info div
+        const selectedEngine = engineSelect.value;
+        if (selectedEngine) {
+            const selectedEngineInfo = document.getElementById(selectedEngine + "-info");
+            selectedEngineInfo.style.display = "block";
+        }
+        });
+
     </script>
 {% endblock %}
